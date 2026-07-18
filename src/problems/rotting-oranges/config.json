@@ -1,0 +1,37 @@
+{
+  "id": "rotting-oranges",
+  "number": 994,
+  "title": "Rotting Oranges",
+  "difficulty": "Medium",
+  "category": "grid",
+  "algorithm": ["BFS", "queue"],
+  "scene": {
+    "type": "grid",
+    "theme": "orange-warehouse",
+    "dimensions": 2,
+    "cellMapping": {
+      "0": "empty",
+      "1": "fresh-orange",
+      "2": "rotten-orange"
+    }
+  },
+  "examples": [
+    {
+      "name": "Standard infection",
+      "input": [[2, 1, 1], [1, 1, 0], [0, 1, 1]],
+      "expected": 4
+    },
+    {
+      "name": "Impossible infection",
+      "input": [[2, 1, 1], [0, 1, 1], [1, 0, 1]],
+      "expected": -1
+    },
+    {
+      "name": "Already done",
+      "input": [[0, 2]],
+      "expected": 0
+    }
+  ],
+  "solutionFile": "solution.py",
+  "defaultExample": 0
+}

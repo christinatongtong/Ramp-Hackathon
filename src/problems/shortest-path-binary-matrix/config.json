@@ -1,0 +1,37 @@
+{
+  "id": "shortest-path-binary-matrix",
+  "number": 1091,
+  "title": "Shortest Path in Binary Matrix",
+  "difficulty": "Medium",
+  "category": "grid",
+  "algorithm": ["BFS", "shortest-path"],
+  "scene": {
+    "type": "grid",
+    "theme": "binary-maze",
+    "dimensions": 2,
+    "cellMapping": {
+      "0": "open",
+      "1": "blocked"
+    },
+    "pathOverlay": true
+  },
+  "examples": [
+    {
+      "name": "Diagonal shortcut",
+      "input": [[0, 1], [1, 0]],
+      "expected": 2
+    },
+    {
+      "name": "Longer path",
+      "input": [[0, 0, 0], [1, 1, 0], [1, 1, 0]],
+      "expected": 4
+    },
+    {
+      "name": "Blocked start",
+      "input": [[1, 0, 0], [1, 1, 0], [1, 1, 0]],
+      "expected": -1
+    }
+  ],
+  "solutionFile": "solution.py",
+  "defaultExample": 1
+}

@@ -1,0 +1,41 @@
+{
+  "id": "number-of-islands",
+  "number": 200,
+  "title": "Number of Islands",
+  "difficulty": "Medium",
+  "category": "grid",
+  "algorithm": ["DFS", "BFS", "flood-fill"],
+  "scene": {
+    "type": "grid",
+    "theme": "island-explorer",
+    "dimensions": 2,
+    "cellMapping": {
+      "0": "water",
+      "1": "land"
+    }
+  },
+  "examples": [
+    {
+      "name": "Single island",
+      "input": [
+        ["1", "1", "1", "1", "0"],
+        ["1", "1", "0", "1", "0"],
+        ["1", "1", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"]
+      ],
+      "expected": 1
+    },
+    {
+      "name": "Three islands",
+      "input": [
+        ["1", "1", "0", "0", "0"],
+        ["1", "1", "0", "0", "0"],
+        ["0", "0", "1", "0", "0"],
+        ["0", "0", "0", "1", "1"]
+      ],
+      "expected": 3
+    }
+  ],
+  "solutionFile": "solution.py",
+  "defaultExample": 0
+}
