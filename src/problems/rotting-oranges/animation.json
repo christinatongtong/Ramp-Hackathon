@@ -1,1 +1,126 @@
-{}
+{
+  "version": 1,
+  "problem_id": "rotting-oranges",
+  "title": "Rotting Oranges: Multi-Source BFS Infection",
+  "scene": {
+    "type": "grid",
+    "theme": "orange-warehouse",
+    "background_color": "#171A1F",
+    "camera": {
+      "mode": "top_down",
+      "position": [
+        0.0,
+        8.0,
+        0.0
+      ],
+      "target": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "entities": [
+    {
+      "cell_value": "0",
+      "entity": {
+        "primitive": "empty_tile",
+        "variant": "warehouse-empty",
+        "color": "#343A40",
+        "label": "Empty",
+        "idle_animation": "none"
+      }
+    },
+    {
+      "cell_value": "1",
+      "entity": {
+        "primitive": "orange",
+        "variant": "fresh-orange",
+        "color": "#FFA726",
+        "label": "Fresh",
+        "idle_animation": "gentle_bounce"
+      }
+    },
+    {
+      "cell_value": "2",
+      "entity": {
+        "primitive": "orange",
+        "variant": "rotten-orange",
+        "color": "#6A1B9A",
+        "label": "Rotten",
+        "idle_animation": "sick_wobble"
+      }
+    }
+  ],
+  "event_bindings": [
+    {
+      "event_type": "init",
+      "animation": {
+        "effect": "cell_pulse",
+        "duration_ms": 450,
+        "color": "#FFFFFF",
+        "explanation": "Reveal the initial grid while preserving the distinction between empty, fresh, and rotten cells."
+      }
+    },
+    {
+      "event_type": "enqueue",
+      "animation": {
+        "effect": "queue_glow",
+        "duration_ms": 300,
+        "color": "#29B6F6",
+        "explanation": "Mark each rotten orange as it enters the BFS queue, including every initial infection source."
+      }
+    },
+    {
+      "event_type": "dequeue",
+      "animation": {
+        "effect": "cell_pulse",
+        "duration_ms": 260,
+        "color": "#AB47BC",
+        "explanation": "Pulse the rotten orange currently removed from the queue and processed as an infection source."
+      }
+    },
+    {
+      "event_type": "cell_update",
+      "animation": {
+        "effect": "infection_wave",
+        "duration_ms": 480,
+        "color": "#8E24AA",
+        "explanation": "Show the traced fresh cell becoming rotten at its recorded minute."
+      }
+    },
+    {
+      "event_type": "done",
+      "animation": {
+        "effect": "result_reveal",
+        "duration_ms": 650,
+        "color": "#66BB6A",
+        "explanation": "Reveal the traced minimum time, or show impossibility when fresh oranges remain."
+      }
+    }
+  ],
+  "intro": [
+    {
+      "action": "show_title",
+      "duration_ms": 700,
+      "text": "Rotting Oranges — Multi-Source BFS"
+    },
+    {
+      "action": "show_grid",
+      "duration_ms": 600,
+      "text": "Fresh oranges are orange, rotten oranges are purple, and empty cells are dark."
+    },
+    {
+      "action": "highlight_sources",
+      "duration_ms": 650,
+      "text": "All initially rotten oranges begin in the BFS queue at minute 0."
+    }
+  ],
+  "educational_notes": [
+    "The queue starts with every initially rotten orange, so infection spreads from all sources simultaneously.",
+    "A dequeue pulse identifies the orange whose four neighboring cells are being examined.",
+    "The queue glow shows the BFS frontier; event order remains the exact FIFO order supplied by the trace.",
+    "Each cell_update is the factual moment a fresh orange becomes rotten, and its trace minute represents the elapsed infection time.",
+    "The final reveal uses the done event: it displays the elapsed minutes when no fresh oranges remain, -1 when infection is impossible, and 0 when no spreading is needed."
+  ]
+}
