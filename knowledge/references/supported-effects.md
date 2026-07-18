@@ -1,60 +1,47 @@
 # Supported effects
 
-Use only effects from the response schema. Unlisted names are rejected.
+Use only effects listed in `visual-capabilities.json` at the repository root.
+Unlisted names are rejected by the validator. Do not request an effect until the
+frontend registry renders it.
 
-## pulse / cell_pulse
+## none
+
+No visual reaction. Use sparingly for bookkeeping events.
+
+## cell_pulse
 
 Briefly changes a cell's scale and glow. Use for `visit` or `init`.
 
 ## bounce
 
-A short vertical bounce. Use for `dequeue` or playful highlights.
-
-## wobble / squish
-
-Organic squash reactions. Prefer as `targetReaction`, not as the primary
-effect, unless the event is purely decorative.
+A short vertical bounce on the active cell. Useful for queue dequeue beats.
 
 ## queue_glow
 
-Adds a visible border or hovering marker. Use when a cell enters the queue.
+Adds a visible ring around a cell. Use when a cell enters a frontier or queue.
 
-## infection_poof / infection_wave
+## infection_poof
 
-Shows infection spreading into a fresh cell. Prefer `infection_poof` for
-discrete cell updates; use `infection_wave` when directionality helps.
-
-## transform_entity
-
-Transitions an entity from one configured state into another.
+Particle burst + color flash when a cell transforms (e.g. fresh → rotten).
 
 ## island_discovery
 
-Changes connected terrain to an island-specific color.
+Washes a discovered region (`cells` list) with an island highlight color.
 
-## frontier_wave / frontier_expand
+## frontier_wave
 
-Displays a BFS frontier spreading across neighboring cells.
+Expanding ring from the active cell as a BFS frontier spreads.
 
 ## path_reveal
 
-Highlights cells belonging to the final reconstructed path.
-
-## water_flow
-
-Displays directional water or reachability movement between height cells.
-
-## dual_ocean_glow
-
-Highlights cells reachable from both oceans.
+Highlights cells belonging to a reconstructed path.
 
 ## result_reveal
 
-Displays the final result after the `done` event.
+Soft highlight when the algorithm finishes (`done`).
 
-## confetti / failure_deflate / camera_shake
+## confetti / failure_deflate
 
-Result choreography only. Bind these under `resultChoreography`, not as
-algorithm event effects, unless the trace itself has a matching event.
+Result choreography. Prefer binding these under `resultChoreography`.
 
 Effects must clarify an actual trace event. Do not add effects solely for noise.

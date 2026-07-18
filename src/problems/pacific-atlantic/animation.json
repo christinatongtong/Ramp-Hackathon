@@ -1,1 +1,176 @@
-{}
+{
+  "world": {
+    "preset": "island",
+    "theme": "derpy ocean heights with clear Pacific, Atlantic, and shared-reach overlays",
+    "sceneType": "grid",
+    "palette": {
+      "sky": "#BEEBFF",
+      "ground": "#D8C58A",
+      "accent": "#FFD166"
+    },
+    "camera": {
+      "mode": "isometric",
+      "position": [
+        8.0,
+        10.0,
+        8.0
+      ],
+      "target": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "props": [
+      {
+        "primitive": "goofy_cloud",
+        "placement": "sky",
+        "count": 3
+      },
+      {
+        "primitive": "sign",
+        "placement": "perimeter",
+        "count": 2
+      }
+    ],
+    "timeSystem": {
+      "mode": "static",
+      "advanceOn": "none"
+    }
+  },
+  "entities": {
+    "1": {
+      "primitive": "height_block",
+      "variant": "elevation-1",
+      "color": "#CDECCF",
+      "label": "1",
+      "idleAnimation": "none",
+      "expression": null
+    },
+    "2": {
+      "primitive": "height_block",
+      "variant": "elevation-2",
+      "color": "#B7DFAE",
+      "label": "2",
+      "idleAnimation": "none",
+      "expression": null
+    },
+    "3": {
+      "primitive": "height_block",
+      "variant": "elevation-3",
+      "color": "#A3D18F",
+      "label": "3",
+      "idleAnimation": "none",
+      "expression": null
+    },
+    "4": {
+      "primitive": "height_block",
+      "variant": "elevation-4",
+      "color": "#C5B978",
+      "label": "4",
+      "idleAnimation": "none",
+      "expression": null
+    },
+    "5": {
+      "primitive": "height_block",
+      "variant": "elevation-5",
+      "color": "#B79B68",
+      "label": "5",
+      "idleAnimation": "none",
+      "expression": null
+    },
+    "6": {
+      "primitive": "height_block",
+      "variant": "elevation-6",
+      "color": "#9B7B61",
+      "label": "6",
+      "idleAnimation": "none",
+      "expression": null
+    },
+    "7": {
+      "primitive": "height_block",
+      "variant": "elevation-7",
+      "color": "#7D625A",
+      "label": "7",
+      "idleAnimation": "none",
+      "expression": null
+    }
+  },
+  "eventBindings": {
+    "init": {
+      "effect": "cell_pulse",
+      "durationMs": 450,
+      "color": "#FFFFFF",
+      "explanation": "Introduce the unchanged height map while keeping every elevation label visible.",
+      "targetReaction": "none",
+      "camera": "none"
+    },
+    "visit": {
+      "effect": "cell_pulse",
+      "durationMs": 260,
+      "color": "#BEEBFF",
+      "explanation": "Pulse the exact cell currently accepted by the ocean-specific reverse DFS.",
+      "targetReaction": "brief_focus",
+      "camera": "none"
+    },
+    "reachability_update": {
+      "effect": "none",
+      "durationMs": 140,
+      "color": null,
+      "explanation": "Reveal the trace-provided Pacific or Atlantic reachability overlay without moving or recoloring the underlying height block.",
+      "targetReaction": "none",
+      "camera": "none"
+    },
+    "path_mark": {
+      "effect": "path_reveal",
+      "durationMs": 420,
+      "color": "#FFD166",
+      "explanation": "Highlight each trace-marked cell that can reach both oceans, preserving emitted order.",
+      "targetReaction": "brief_focus",
+      "camera": "none"
+    },
+    "done": {
+      "effect": "result_reveal",
+      "durationMs": 700,
+      "color": "#FFD166",
+      "explanation": "Present the verified coordinate result after all shared-reach cells have been marked.",
+      "targetReaction": "brief_focus",
+      "camera": "brief_focus"
+    }
+  },
+  "resultChoreography": {
+    "success": {
+      "effect": "confetti",
+      "entityReaction": "bad_dance",
+      "explanation": "Celebrate a completed verified result with a brief derpy reaction that leaves grid overlays readable."
+    },
+    "failure": {
+      "effect": "failure_deflate",
+      "entityReaction": "confused_stare",
+      "explanation": "Gently deflate the scene on failure while preserving the final grid state for inspection."
+    }
+  },
+  "intro": [
+    {
+      "action": "show_title",
+      "durationMs": 900,
+      "text": "Pacific Atlantic Water Flow"
+    },
+    {
+      "action": "show_grid",
+      "durationMs": 700,
+      "text": "Each labeled block shows its elevation."
+    },
+    {
+      "action": "camera_pan",
+      "durationMs": 800,
+      "text": "View the island height map and its ocean-facing edges."
+    },
+    {
+      "action": "highlight_sources",
+      "durationMs": 900,
+      "text": "Reverse searches begin from the Pacific and Atlantic borders."
+    }
+  ],
+  "published": true
+}

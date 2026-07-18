@@ -14,6 +14,8 @@ export type AnimationStep = {
   /** 0-based day index — each loop iteration advances the world clock */
   day: number;
   label?: string;
+  /** Per-step duration; AnimationEngine falls back to msPerStep when omitted */
+  durationMs?: number;
   /** Problem-specific snapshot (e.g. grid, graph, queue state) */
   state: Record<string, unknown>;
   events?: AnimationEvent[];

@@ -10,8 +10,10 @@
     "theme": "binary-maze",
     "dimensions": 2,
     "cellMapping": {
-      "0": "open",
-      "1": "blocked"
+      "0": "land",
+      "1": "wall",
+      "2": "land",
+      "3": "destination"
     },
     "pathOverlay": true
   },

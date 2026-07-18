@@ -12,6 +12,7 @@ import type {
 } from "@/lib/api/types";
 import { resolveEffect } from "@/lib/effects/registry";
 import {
+  compileIntroTimeline,
   compileTimeline,
   readGridFromState,
 } from "@/lib/trace/compileTimeline";
@@ -31,6 +32,21 @@ function emptyGrid(): Grid {
   return [];
 }
 
+function asCoordPairs(value: unknown): Array<[number, number]> | null {
+  if (!Array.isArray(value)) return null;
+  const pairs: Array<[number, number]> = [];
+  for (const item of value) {
+    if (
+      Array.isArray(item) &&
+      typeof item[0] === "number" &&
+      typeof item[1] === "number"
+    ) {
+      pairs.push([item[0], item[1]]);
+    }
+  }
+  return pairs;
+}
+
 export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
   const { loading, error, problem, visualPlan, initialState, submit } =
     useAnimationPackage(problemId);
@@ -47,6 +63,19 @@ export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
     col: number;
   } | null>(null);
   const [statusLabel, setStatusLabel] = useState<string | null>(null);
+  const [effect, setEffect] = useState<string | null>(null);
+  const [effectColor, setEffectColor] = useState<string | null>(null);
+  const [regionCells, setRegionCells] = useState<Array<[number, number]> | null>(
+    null,
+  );
+  const [frontierCells, setFrontierCells] = useState<Array<
+    [number, number]
+  > | null>(null);
+  const [cameraCue, setCameraCue] = useState<string | null>(null);
+  const [resultOverlay, setResultOverlay] = useState(false);
+  const [resultPassed, setResultPassed] = useState(true);
+  const [resultExplanation, setResultExplanation] = useState<string | null>(null);
+  const [introTitle, setIntroTitle] = useState<string | null>(null);
   const [problemOpen, setProblemOpen] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [introLanded, setIntroLanded] = useState(false);
@@ -54,6 +83,7 @@ export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
   const [isToggling, setIsToggling] = useState(false);
   const autoOpenDone = useRef(false);
   const codeSeeded = useRef(false);
+  const introPlayed = useRef(false);
 
   useEffect(() => () => animationEngine.cancel(), []);
 
@@ -70,6 +100,25 @@ export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
     if (initial) setGrid(initial);
     setGameStatus("idle");
   }, [initialState]);
+
+  const playIntroActions = useCallback(async () => {
+    if (!visualPlan || introPlayed.current) return;
+    introPlayed.current = true;
+    const intro = compileIntroTimeline(visualPlan);
+    for (const step of intro) {
+      if (step.action === "show_title") {
+        setIntroTitle(step.text ?? visualPlan.world.theme);
+      } else if (step.action === "show_grid") {
+        setStatusLabel(step.text);
+      } else if (step.action === "highlight_sources") {
+        setStatusLabel(step.text);
+        setPulse(true);
+      }
+      await new Promise((resolve) => window.setTimeout(resolve, step.durationMs));
+    }
+    setIntroTitle(null);
+    setPulse(false);
+  }, [visualPlan]);
 
   const requestToggle = useCallback(() => {
     if (!introLanded || isToggling) return;
@@ -90,6 +139,7 @@ export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
 
   const handleIntroLand = useCallback(() => {
     setIntroLanded(true);
+    void playIntroActions();
     if (!autoOpenDone.current) {
       autoOpenDone.current = true;
       window.setTimeout(() => {
@@ -97,7 +147,7 @@ export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
         setToggleTrigger((count) => count + 1);
       }, 800);
     }
-  }, []);
+  }, [playIntroActions]);
 
   const handleBoardHit = useCallback((open: boolean) => {
     setProblemOpen(open);
@@ -113,13 +163,25 @@ export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
     setGrid(initial ?? emptyGrid());
   }, [initialState]);
 
-  const handleReset = () => {
-    animationEngine.cancel();
-    restoreInitialGrid();
+  const clearPlaybackState = () => {
     setDayIndex(null);
     setPulse(false);
     setActiveCell(null);
     setStatusLabel(null);
+    setEffect(null);
+    setEffectColor(null);
+    setRegionCells(null);
+    setFrontierCells(null);
+    setCameraCue(null);
+    setResultOverlay(false);
+    setResultExplanation(null);
+    setIntroTitle(null);
+  };
+
+  const handleReset = () => {
+    animationEngine.cancel();
+    restoreInitialGrid();
+    clearPlaybackState();
     setStatusMessage(null);
     setGameStatus("idle");
     setRunResult(null);
@@ -140,10 +202,7 @@ export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
     animationEngine.cancel();
     setGameStatus("checking");
     setRunResult(null);
-    setPulse(false);
-    setDayIndex(null);
-    setActiveCell(null);
-    setStatusLabel(null);
+    clearPlaybackState();
     setStatusMessage("Checking your solution…");
     restoreInitialGrid();
 
@@ -163,7 +222,6 @@ export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
       setGameStatus("passed");
       setStatusMessage(`✓ ${result.message}`);
 
-      // Brief success flash, then animate the canonical reward trace.
       await new Promise((resolve) => window.setTimeout(resolve, 700));
 
       const script = compileTimeline(problemId, result.execution, visualPlan);
@@ -179,9 +237,27 @@ export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
 
           const effectName =
             typeof step.state.effect === "string" ? step.state.effect : null;
-          const effect = resolveEffect(effectName);
-          setPulse(effect.pulse && index > 0);
-          setStatusLabel(effect.label ?? step.label ?? null);
+          const resolved = resolveEffect(effectName);
+          setEffect(effectName);
+          setEffectColor(
+            typeof step.state.effectColor === "string"
+              ? step.state.effectColor
+              : null,
+          );
+          setPulse(resolved.pulse && index > 0);
+          setStatusLabel(resolved.label ?? step.label ?? null);
+          setCameraCue(
+            typeof step.state.cameraCue === "string" ? step.state.cameraCue : null,
+          );
+          setRegionCells(asCoordPairs(step.state.regionCells));
+          setFrontierCells(asCoordPairs(step.state.frontier));
+          setResultOverlay(Boolean(step.state.resultOverlay));
+          setResultPassed(Boolean(step.state.passed));
+          setResultExplanation(
+            typeof step.state.resultExplanation === "string"
+              ? step.state.resultExplanation
+              : null,
+          );
 
           const cell = step.state.activeCell as
             | { row: number; col: number }
@@ -240,7 +316,7 @@ export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
       <div className="farm-layout__world">
         <WorldRenderer
           visualPlan={visualPlan}
-          grid={grid.length ? grid : [[0]]}
+          grid={grid.length ? grid : [["0"]]}
           pulse={pulse}
           activeCell={activeCell}
           dayIndex={dayIndex}
@@ -252,6 +328,15 @@ export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
           onBoardHit={handleBoardHit}
           onToggleDone={handleToggleDone}
           statusLabel={statusLabel}
+          effect={effect}
+          effectColor={effectColor}
+          regionCells={regionCells}
+          frontierCells={frontierCells}
+          cameraCue={cameraCue}
+          resultOverlay={resultOverlay}
+          resultPassed={resultPassed}
+          resultExplanation={resultExplanation}
+          introTitle={introTitle}
         />
 
         <ProblemPanel problem={problem} visible={modalVisible} />

@@ -5,14 +5,22 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from backend.capabilities import (
+    supported_effects,
+    supported_presets,
+    supported_primitives,
+)
+
 
 SceneType = Literal["grid", "height_map"]
 CameraMode = Literal["top_down", "isometric", "follow"]
 RunMode = Literal["canonical", "user"]
-WorldPreset = Literal["farm", "island", "mountain", "maze", "generic_grid"]
+# Keep in sync with visual-capabilities.json presets.
+WorldPreset = Literal["farm", "island", "generic_grid"]
 PropPlacement = Literal["perimeter", "sky", "back", "front", "scatter"]
 TimeAdvanceOn = Literal["minute", "level", "event", "none"]
 
+# Keep in sync with visual-capabilities.json entityPrimitives + propPrimitives.
 PrimitiveType = Literal[
     "empty_tile",
     "floor_tile",
@@ -21,7 +29,6 @@ PrimitiveType = Literal[
     "land",
     "water",
     "wall",
-    "character",
     "destination",
     "height_block",
     "tree",
@@ -48,27 +55,19 @@ EntityReaction = Literal[
     "brief_focus",
 ]
 
+# Keep in sync with visual-capabilities.json effects.
 AnimationEffect = Literal[
     "none",
-    "pulse",
-    "bounce",
-    "wobble",
-    "squish",
     "cell_pulse",
+    "bounce",
     "queue_glow",
     "infection_poof",
-    "infection_wave",
-    "transform_entity",
     "island_discovery",
     "frontier_wave",
-    "frontier_expand",
     "path_reveal",
-    "water_flow",
-    "dual_ocean_glow",
     "result_reveal",
     "confetti",
     "failure_deflate",
-    "camera_shake",
 ]
 
 IntroActionType = Literal[
@@ -79,15 +78,9 @@ IntroActionType = Literal[
     "highlight_destination",
 ]
 
-SUPPORTED_EFFECTS: frozenset[str] = frozenset(
-    AnimationEffect.__args__  # type: ignore[attr-defined]
-)
-SUPPORTED_PRIMITIVES: frozenset[str] = frozenset(
-    PrimitiveType.__args__  # type: ignore[attr-defined]
-)
-SUPPORTED_PRESETS: frozenset[str] = frozenset(
-    WorldPreset.__args__  # type: ignore[attr-defined]
-)
+SUPPORTED_EFFECTS: frozenset[str] = supported_effects()
+SUPPORTED_PRIMITIVES: frozenset[str] = supported_primitives()
+SUPPORTED_PRESETS: frozenset[str] = supported_presets()
 
 
 class StrictModel(BaseModel):

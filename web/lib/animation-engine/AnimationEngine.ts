@@ -30,14 +30,17 @@ export class AnimationEngine {
       return;
     }
 
+    let delay = 0;
     script.steps.forEach((step, index) => {
+      const duration = step.durationMs ?? msPerStep;
       const timer = window.setTimeout(() => {
         onStep?.(step, index, script.steps.length);
         if (index === script.steps.length - 1) {
           onComplete?.(script);
         }
-      }, index * msPerStep);
+      }, delay);
       this.timers.push(timer);
+      delay += duration;
     });
   }
 }

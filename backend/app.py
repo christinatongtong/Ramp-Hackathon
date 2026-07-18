@@ -3,7 +3,11 @@ from __future__ import annotations
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.animation_service import create_animation_package, get_client_package
+from backend.animation_service import (
+    VisualPlanMissingError,
+    create_animation_package,
+    get_client_package,
+)
 from backend.problem_loader import get_problem_detail, list_problems, load_problem
 from backend.runner_service import UserCodeNotEnabledError, run_submission, run_solution
 from backend.schemas import (
@@ -71,6 +75,8 @@ def get_package(
             force_visual=force,
             style=style,
         )
+    except VisualPlanMissingError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
     except UserCodeNotEnabledError as error:
         raise HTTPException(status_code=501, detail=str(error)) from error
     except (FileNotFoundError, ValueError, RuntimeError) as error:

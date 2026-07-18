@@ -1,14 +1,20 @@
 from __future__ import annotations
 
+from backend.capabilities import (
+    supported_effects,
+    supported_presets,
+    supported_primitives,
+)
 from backend.problem_loader import get_cell_mapping
 from backend.schemas import (
-    SUPPORTED_EFFECTS,
-    SUPPORTED_PRESETS,
-    SUPPORTED_PRIMITIVES,
     ExecutionResult,
     GeneratedVisualPlan,
     ProblemPackage,
 )
+
+SUPPORTED_EFFECTS = supported_effects()
+SUPPORTED_PRESETS = supported_presets()
+SUPPORTED_PRIMITIVES = supported_primitives()
 
 
 def get_trace_event_types(execution: ExecutionResult) -> set[str]:

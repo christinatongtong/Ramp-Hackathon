@@ -1,41 +1,37 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import type { FarmWorldProps } from "./FarmWorld";
+import type { GridWorldProps } from "./types";
 import type { VisualPlan } from "@/lib/api/types";
+
+const loading = (
+  <div className="flex h-full items-center justify-center bg-[#7ecbff] text-slate-800">
+    Loading world…
+  </div>
+);
 
 const FarmWorld = dynamic(
   () => import("./FarmWorld").then((mod) => mod.FarmWorld),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-full items-center justify-center bg-[#7ecbff] text-slate-800">
-        Loading world…
-      </div>
-    ),
-  },
+  { ssr: false, loading: () => loading },
+);
+
+const IslandWorld = dynamic(
+  () => import("./IslandWorld").then((mod) => mod.IslandWorld),
+  { ssr: false, loading: () => loading },
 );
 
 const GenericGridWorld = dynamic(
-  () => import("./FarmWorld").then((mod) => mod.FarmWorld),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-full items-center justify-center bg-[#7ecbff] text-slate-800">
-        Loading world…
-      </div>
-    ),
-  },
+  () => import("./GenericGridWorld").then((mod) => mod.GenericGridWorld),
+  { ssr: false, loading: () => loading },
 );
 
-export type WorldRendererProps = Omit<FarmWorldProps, "visualPlan"> & {
+export type WorldRendererProps = Omit<GridWorldProps, "visualPlan"> & {
   visualPlan: VisualPlan;
 };
 
 /**
- * Selects a hardcoded world preset from visualPlan.world.preset.
- * Only farm is fully implemented; other presets fall back to FarmWorld
- * until dedicated scenes exist.
+ * Selects a world preset from visualPlan.world.preset.
+ * Unsupported / future presets fall back to GenericGridWorld.
  */
 export function WorldRenderer({ visualPlan, ...rest }: WorldRendererProps) {
   const preset = visualPlan.world.preset;
@@ -44,9 +40,10 @@ export function WorldRenderer({ visualPlan, ...rest }: WorldRendererProps) {
     case "farm":
       return <FarmWorld visualPlan={visualPlan} {...rest} />;
     case "island":
+      return <IslandWorld visualPlan={visualPlan} {...rest} />;
+    case "generic_grid":
     case "mountain":
     case "maze":
-    case "generic_grid":
     default:
       return <GenericGridWorld visualPlan={visualPlan} {...rest} />;
   }

@@ -1,29 +1,9 @@
 "use client";
 
-import { Suspense, useMemo, useRef } from "react";
-import { Canvas } from "@react-three/fiber";
-import { Cloud, OrbitControls, Text } from "@react-three/drei";
-import type { Grid, VisualPlan } from "@/lib/api/types";
-import { DayNightSky, dayLabel } from "@/components/rotting-oranges/DayNightSky";
-import { FarmPlayer } from "@/components/rotting-oranges/FarmPlayer";
-import { ProblemBoard3D } from "@/components/rotting-oranges/ProblemBoard3D";
-import { GridEntityLayer } from "@/components/entities/GridEntityLayer";
-
-export type FarmWorldProps = {
-  grid: Grid;
-  visualPlan: VisualPlan;
-  pulse: boolean;
-  activeCell: { row: number; col: number } | null;
-  dayIndex: number | null;
-  problemOpen: boolean;
-  toggleTrigger: number;
-  introLanded: boolean;
-  orbitEnabled: boolean;
-  onIntroLand: () => void;
-  onBoardHit: (open: boolean) => void;
-  onToggleDone: () => void;
-  statusLabel?: string | null;
-};
+import { Cloud } from "@react-three/drei";
+import { BaseGridWorld } from "./BaseGridWorld";
+import type { GridWorldProps } from "./types";
+import type { VisualPlan } from "@/lib/api/types";
 
 function Tree({
   position,
@@ -166,23 +146,11 @@ function FarmEnvironment({
   );
 }
 
-function SceneContent(props: FarmWorldProps) {
-  const {
-    grid,
-    visualPlan,
-    pulse,
-    activeCell,
-    dayIndex,
-    problemOpen,
-    toggleTrigger,
-    orbitEnabled,
-    onIntroLand,
-    onBoardHit,
-    onToggleDone,
-    statusLabel,
-  } = props;
+/** @deprecated Prefer GridWorldProps — kept for WorldRenderer typing. */
+export type FarmWorldProps = GridWorldProps;
 
-  const boardOpenAmount = useRef(0);
+export function FarmWorld(props: GridWorldProps) {
+  const dayIndex = props.dayIndex;
   const nightFactor =
     dayIndex === null
       ? 0
@@ -191,96 +159,14 @@ function SceneContent(props: FarmWorldProps) {
         : dayIndex % 4 === 2
           ? 0.35
           : 0;
-  const label = statusLabel ?? dayLabel(dayIndex);
-  const cameraTarget = visualPlan.world.camera.target;
 
   return (
-    <>
-      <DayNightSky dayIndex={dayIndex} />
-      <directionalLight
-        castShadow
-        intensity={1.3 - nightFactor * 0.6}
-        position={[8, 14, 6]}
-        shadow-mapSize={[1024, 1024]}
-      />
-      <pointLight
-        intensity={0.3 - nightFactor * 0.15}
-        position={[-5, 4, 3]}
-        color={visualPlan.world.palette.accent}
-      />
-
-      <FarmEnvironment visualPlan={visualPlan} nightFactor={nightFactor} />
-      <GridEntityLayer
-        grid={grid}
-        entities={visualPlan.entities}
-        pulse={pulse}
-        activeCell={activeCell}
-        title={visualPlan.world.theme}
-      />
-
-      <ProblemBoard3D open={problemOpen} openAmountRef={boardOpenAmount} />
-
-      <FarmPlayer
-        toggleTrigger={toggleTrigger}
-        problemOpen={problemOpen}
-        onIntroLand={onIntroLand}
-        onBoardHit={onBoardHit}
-        onToggleDone={onToggleDone}
-      />
-
-      {label && (
-        <Text
-          position={[0, 3.2, 0]}
-          fontSize={0.32}
-          color="#fff7e6"
-          anchorX="center"
-          anchorY="middle"
-          outlineWidth={0.025}
-          outlineColor="#1f2937"
-        >
-          {label}
-        </Text>
-      )}
-
-      <OrbitControls
-        enablePan={false}
-        minPolarAngle={Math.PI / 5.5}
-        maxPolarAngle={Math.PI / 2.35}
-        minAzimuthAngle={-Math.PI / 2.8}
-        maxAzimuthAngle={Math.PI / 2.8}
-        minDistance={8}
-        maxDistance={17}
-        target={
-          Array.isArray(cameraTarget)
-            ? ([cameraTarget[0], cameraTarget[1] || 0.6, cameraTarget[2]] as [
-                number,
-                number,
-                number,
-              ])
-            : [0, 0.6, -0.5]
-        }
-        rotateSpeed={0.45}
-        enabled={orbitEnabled}
-      />
-    </>
-  );
-}
-
-export function FarmWorld(props: FarmWorldProps) {
-  const cam = props.visualPlan.world.camera.position;
-  const cameraPosition = useMemo(
-    (): [number, number, number] =>
-      Array.isArray(cam)
-        ? [cam[0] ?? 3.5, cam[1] ?? 8, cam[2] ?? 14]
-        : [3.5, 8, 14],
-    [cam],
-  );
-
-  return (
-    <Canvas shadows camera={{ position: cameraPosition, fov: 48 }}>
-      <Suspense fallback={null}>
-        <SceneContent {...props} />
-      </Suspense>
-    </Canvas>
+    <BaseGridWorld
+      {...props}
+      nightFactor={nightFactor}
+      environment={
+        <FarmEnvironment visualPlan={props.visualPlan} nightFactor={nightFactor} />
+      }
+    />
   );
 }

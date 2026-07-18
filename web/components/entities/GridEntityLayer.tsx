@@ -3,8 +3,10 @@
 import { useMemo } from "react";
 import { Text } from "@react-three/drei";
 import type { EntityDefinition, Grid } from "@/lib/api/types";
+import { resolveEntityRenderer } from "./entityRegistry";
+import { DEFAULT_CELL_SIZE } from "./renderers/types";
 
-const CELL_SIZE = 1.35;
+export { DEFAULT_CELL_SIZE as CELL_SIZE };
 
 type GridEntityLayerProps = {
   grid: Grid;
@@ -12,10 +14,12 @@ type GridEntityLayerProps = {
   pulse?: boolean;
   activeCell?: { row: number; col: number } | null;
   title?: string;
+  regionCells?: Array<[number, number]> | null;
+  frontierCells?: Array<[number, number]> | null;
 };
 
-function isFruitPrimitive(primitive: string) {
-  return primitive === "fruit" || primitive === "orange";
+function isWaterLike(primitive: string) {
+  return primitive === "water" || primitive === "empty_tile";
 }
 
 export function GridEntityLayer({
@@ -24,80 +28,80 @@ export function GridEntityLayer({
   pulse = false,
   activeCell = null,
   title = "Grid",
+  regionCells = null,
+  frontierCells = null,
 }: GridEntityLayerProps) {
   const origin = useMemo(() => {
     const rows = grid.length;
     const cols = grid[0]?.length ?? 0;
     return {
-      x: -((cols - 1) * CELL_SIZE) / 2,
-      z: -((rows - 1) * CELL_SIZE) / 2,
+      x: -((cols - 1) * DEFAULT_CELL_SIZE) / 2,
+      z: -((rows - 1) * DEFAULT_CELL_SIZE) / 2,
     };
   }, [grid]);
+
+  const regionSet = useMemo(() => {
+    const set = new Set<string>();
+    for (const cell of regionCells ?? []) {
+      set.add(`${cell[0]},${cell[1]}`);
+    }
+    return set;
+  }, [regionCells]);
+
+  const frontierSet = useMemo(() => {
+    const set = new Set<string>();
+    for (const cell of frontierCells ?? []) {
+      set.add(`${cell[0]},${cell[1]}`);
+    }
+    return set;
+  }, [frontierCells]);
 
   return (
     <group position={[0, 0.05, -1]}>
       {grid.map((row, rowIndex) =>
         row.map((cell, colIndex) => {
-          const entity = entities[String(cell)];
-          const color = entity?.color ?? "#888888";
-          const primitive = entity?.primitive ?? "empty_tile";
+          const entity = entities[String(cell)] ?? {
+            primitive: "empty_tile",
+            variant: "fallback",
+            color: "#888888",
+            label: String(cell),
+            idleAnimation: "none",
+            expression: null,
+          };
+          const primitive = entity.primitive ?? "empty_tile";
           const isActive =
             activeCell?.row === rowIndex && activeCell?.col === colIndex;
-          const x = origin.x + colIndex * CELL_SIZE;
-          const z = origin.z + rowIndex * CELL_SIZE;
-          const showFruit = isFruitPrimitive(primitive);
-          const showLand =
-            primitive === "land" ||
-            primitive === "floor_tile" ||
-            primitive === "wall" ||
-            primitive === "destination" ||
-            primitive === "height_block";
+          const key = `${rowIndex},${colIndex}`;
+          const inRegion = regionSet.has(key);
+          const inFrontier = frontierSet.has(key);
+          const x = origin.x + colIndex * DEFAULT_CELL_SIZE;
+          const z = origin.z + rowIndex * DEFAULT_CELL_SIZE;
+          const EntityComponent = resolveEntityRenderer(primitive);
+          const floorColor = isWaterLike(primitive)
+            ? entity.color
+            : "#7cb342";
 
           return (
-            <group key={`${rowIndex}-${colIndex}`} position={[x, 0, z]}>
-              <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
-                <planeGeometry args={[CELL_SIZE * 0.95, CELL_SIZE * 0.95]} />
-                <meshStandardMaterial
-                  color={
-                    primitive === "empty_tile" || primitive === "water"
-                      ? color
-                      : "#7cb342"
-                  }
-                />
-              </mesh>
-
-              {showFruit && (
-                <mesh
-                  castShadow
-                  position={[0, 0.45 + (pulse && isActive ? 0.08 : 0), 0]}
-                  scale={pulse && isActive ? 1.12 : 1}
-                >
-                  <sphereGeometry args={[0.38, 20, 20]} />
+            <group key={key} position={[x, 0, z]}>
+              {!isWaterLike(primitive) && (
+                <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
+                  <planeGeometry
+                    args={[DEFAULT_CELL_SIZE * 0.95, DEFAULT_CELL_SIZE * 0.95]}
+                  />
                   <meshStandardMaterial
-                    color={color}
-                    emissive={isActive ? color : "#000000"}
-                    emissiveIntensity={isActive ? 0.35 : 0}
+                    color={inRegion ? entity.color : floorColor}
+                    emissive={inFrontier ? "#29B6F6" : "#000000"}
+                    emissiveIntensity={inFrontier ? 0.25 : 0}
                   />
                 </mesh>
               )}
 
-              {showLand && (
-                <mesh castShadow position={[0, 0.2, 0]}>
-                  <boxGeometry args={[0.9, 0.35, 0.9]} />
-                  <meshStandardMaterial
-                    color={color}
-                    emissive={isActive ? color : "#000000"}
-                    emissiveIntensity={isActive ? 0.25 : 0}
-                  />
-                </mesh>
-              )}
-
-              {entity?.idleAnimation === "sick_wobble" && showFruit && (
-                <mesh position={[0, 0.9, 0]}>
-                  <sphereGeometry args={[0.08, 8, 8]} />
-                  <meshStandardMaterial color="#1a1a1a" emissive="#111111" />
-                </mesh>
-              )}
+              <EntityComponent
+                entity={entity}
+                value={cell}
+                active={isActive || inRegion}
+                pulse={pulse}
+              />
             </group>
           );
         }),
@@ -117,5 +121,3 @@ export function GridEntityLayer({
     </group>
   );
 }
-
-export { CELL_SIZE };

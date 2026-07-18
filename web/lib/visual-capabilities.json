@@ -1,0 +1,46 @@
+{
+  "presets": ["farm", "island", "generic_grid"],
+  "entityPrimitives": [
+    "empty_tile",
+    "floor_tile",
+    "fruit",
+    "orange",
+    "land",
+    "water",
+    "wall",
+    "destination",
+    "height_block"
+  ],
+  "propPrimitives": [
+    "tree",
+    "cloud",
+    "goofy_cloud",
+    "fence",
+    "sign"
+  ],
+  "effects": [
+    "none",
+    "cell_pulse",
+    "bounce",
+    "queue_glow",
+    "infection_poof",
+    "island_discovery",
+    "frontier_wave",
+    "path_reveal",
+    "result_reveal",
+    "confetti",
+    "failure_deflate"
+  ],
+  "gridEvents": [
+    "init",
+    "visit",
+    "frontier_add",
+    "frontier_remove",
+    "cell_update",
+    "region_discovered",
+    "reachability_update",
+    "path_mark",
+    "level_start",
+    "done"
+  ]
+}

@@ -37,12 +37,7 @@ export type ProblemSummary = {
   hasVisualPlan: boolean;
 };
 
-export type WorldPreset =
-  | "farm"
-  | "island"
-  | "mountain"
-  | "maze"
-  | "generic_grid";
+export type WorldPreset = "farm" | "island" | "generic_grid" | string;
 
 export type EntityDefinition = {
   primitive: string;
@@ -141,4 +136,5 @@ export type GameStatus =
   | "animating"
   | "complete";
 
-export type Grid = number[][];
+export type CellValue = string | number;
+export type Grid = CellValue[][];

@@ -99,6 +99,8 @@ def list_problems() -> list[ProblemSummary]:
 
 
 def _has_visual_plan_file(problem_id: str) -> bool:
+    """Hub unlock: published animation.json that passes capability checks."""
+
     path = get_problem_directory(problem_id) / "animation.json"
     if not path.exists():
         return False
@@ -109,7 +111,14 @@ def _has_visual_plan_file(problem_id: str) -> bool:
         payload = json.loads(raw)
     except json.JSONDecodeError:
         return False
-    return isinstance(payload, dict) and "world" in payload
+    if not isinstance(payload, dict) or "world" not in payload:
+        return False
+    if payload.get("published") is not True:
+        return False
+
+    from backend.capabilities import plan_uses_supported_capabilities
+
+    return not plan_uses_supported_capabilities(payload)
 
 
 def get_problem_detail(problem_id: str) -> ProblemDetail:

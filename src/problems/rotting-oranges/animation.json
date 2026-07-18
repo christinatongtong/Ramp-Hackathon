@@ -131,5 +131,6 @@
       "durationMs": 650,
       "text": "All initially rotten oranges begin in the BFS queue at minute 0."
     }
-  ]
+  ],
+  "published": true
 }

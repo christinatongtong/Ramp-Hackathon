@@ -1,1 +1,165 @@
-{}
+{
+  "world": {
+    "preset": "generic_grid",
+    "theme": "derpy-binary-maze",
+    "sceneType": "grid",
+    "palette": {
+      "sky": "#BFE9FF",
+      "ground": "#D9E2E8",
+      "accent": "#FFD166"
+    },
+    "camera": {
+      "mode": "top_down",
+      "position": [
+        0.0,
+        10.0,
+        0.0
+      ],
+      "target": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "props": [
+      {
+        "primitive": "goofy_cloud",
+        "placement": "sky",
+        "count": 2
+      },
+      {
+        "primitive": "sign",
+        "placement": "perimeter",
+        "count": 1
+      },
+      {
+        "primitive": "fence",
+        "placement": "perimeter",
+        "count": 4
+      }
+    ],
+    "timeSystem": {
+      "mode": "static",
+      "advanceOn": "none"
+    }
+  },
+  "entities": {
+    "0": {
+      "primitive": "floor_tile",
+      "variant": "open_clear_cell",
+      "color": "#F4F7F5",
+      "label": "Open",
+      "idleAnimation": "none",
+      "expression": null
+    },
+    "1": {
+      "primitive": "wall",
+      "variant": "chunky_derpy_block",
+      "color": "#465362",
+      "label": "Blocked",
+      "idleAnimation": "none",
+      "expression": "sleepy"
+    },
+    "2": {
+      "primitive": "floor_tile",
+      "variant": "visited_cell",
+      "color": "#72DDF7",
+      "label": "Visited",
+      "idleAnimation": "soft_glow",
+      "expression": null
+    },
+    "3": {
+      "primitive": "floor_tile",
+      "variant": "shortest_path",
+      "color": "#FFD166",
+      "label": "Path",
+      "idleAnimation": "soft_glow",
+      "expression": "proud"
+    }
+  },
+  "eventBindings": {
+    "init": {
+      "effect": "cell_pulse",
+      "durationMs": 450,
+      "color": "#B8C4CE",
+      "explanation": "Reveal the binary grid while preserving open and blocked cell states.",
+      "targetReaction": "none",
+      "camera": "none"
+    },
+    "visit": {
+      "effect": "cell_pulse",
+      "durationMs": 400,
+      "color": "#72DDF7",
+      "explanation": "Pulse each cell when BFS first visits it and records its distance.",
+      "targetReaction": "brief_focus",
+      "camera": "none"
+    },
+    "frontier_add": {
+      "effect": "queue_glow",
+      "durationMs": 450,
+      "color": "#20C4F4",
+      "explanation": "Add a clear ring to show that the visited cell has entered the BFS frontier.",
+      "targetReaction": "none",
+      "camera": "none"
+    },
+    "frontier_remove": {
+      "effect": "bounce",
+      "durationMs": 350,
+      "color": "#118AB2",
+      "explanation": "Bounce the active cell as it leaves the frontier for processing.",
+      "targetReaction": "brief_focus",
+      "camera": "none"
+    },
+    "path_mark": {
+      "effect": "path_reveal",
+      "durationMs": 500,
+      "color": "#FFD166",
+      "explanation": "Reveal each cell belonging to the reconstructed shortest path in trace order.",
+      "targetReaction": "brief_focus",
+      "camera": "none"
+    },
+    "done": {
+      "effect": "result_reveal",
+      "durationMs": 800,
+      "color": "#06D6A0",
+      "explanation": "Reveal the verified shortest-path result, or indicate that no clear path exists.",
+      "targetReaction": "none",
+      "camera": "brief_focus"
+    }
+  },
+  "resultChoreography": {
+    "success": {
+      "effect": "confetti",
+      "entityReaction": "bad_dance",
+      "explanation": "Celebrate when BFS reaches the destination and returns a shortest-path length."
+    },
+    "failure": {
+      "effect": "failure_deflate",
+      "entityReaction": "confused_stare",
+      "explanation": "Deflate gently when the destination cannot be reached and the result is -1."
+    }
+  },
+  "intro": [
+    {
+      "action": "show_title",
+      "durationMs": 900,
+      "text": "Shortest Path in Binary Matrix"
+    },
+    {
+      "action": "show_grid",
+      "durationMs": 700,
+      "text": "Open cells are light; chunky derpy walls are blocked."
+    },
+    {
+      "action": "highlight_sources",
+      "durationMs": 550,
+      "text": "BFS begins at the top-left cell when it is open."
+    },
+    {
+      "action": "highlight_destination",
+      "durationMs": 550,
+      "text": "The goal is the bottom-right cell."
+    }
+  ],
+  "published": true
+}

@@ -1,1 +1,139 @@
-{}
+{
+  "world": {
+    "preset": "island",
+    "theme": "derpy island explorer with clear DFS flood-fill states",
+    "sceneType": "grid",
+    "palette": {
+      "sky": "#9EDCFF",
+      "ground": "#E7C978",
+      "accent": "#FFB347"
+    },
+    "camera": {
+      "mode": "top_down",
+      "position": [
+        0.0,
+        10.0,
+        0.0
+      ],
+      "target": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "props": [
+      {
+        "primitive": "goofy_cloud",
+        "placement": "sky",
+        "count": 3
+      },
+      {
+        "primitive": "sign",
+        "placement": "back",
+        "count": 1
+      }
+    ],
+    "timeSystem": {
+      "mode": "static",
+      "advanceOn": "none"
+    }
+  },
+  "entities": {
+    "0": {
+      "primitive": "water",
+      "variant": "calm_derpy_water",
+      "color": "#4EA8DE",
+      "label": "Water",
+      "idleAnimation": "water_ripple",
+      "expression": null
+    },
+    "1": {
+      "primitive": "land",
+      "variant": "unvisited_land",
+      "color": "#79C267",
+      "label": "Unvisited land",
+      "idleAnimation": "gentle_bounce",
+      "expression": "cheerful"
+    },
+    "#": {
+      "primitive": "land",
+      "variant": "dfs_visited_land",
+      "color": "#F2C14E",
+      "label": "Visited land",
+      "idleAnimation": "soft_glow",
+      "expression": "derpy-proud"
+    }
+  },
+  "eventBindings": {
+    "init": {
+      "effect": "cell_pulse",
+      "durationMs": 500,
+      "color": "#FFFFFF",
+      "explanation": "Reveal the input grid while keeping water and unvisited land visually distinct.",
+      "targetReaction": "none",
+      "camera": "none"
+    },
+    "level_start": {
+      "effect": "frontier_wave",
+      "durationMs": 650,
+      "color": "#FFB347",
+      "explanation": "Mark the start of the DFS flood-fill for a newly encountered island.",
+      "targetReaction": "brief_focus",
+      "camera": "brief_focus"
+    },
+    "visit": {
+      "effect": "cell_pulse",
+      "durationMs": 350,
+      "color": "#F2C14E",
+      "explanation": "Pulse each land cell as DFS visits it and changes its displayed state to visited land.",
+      "targetReaction": "brief_focus",
+      "camera": "none"
+    },
+    "region_discovered": {
+      "effect": "island_discovery",
+      "durationMs": 900,
+      "color": "#FFD166",
+      "explanation": "Wash the completed connected region with one highlight so its full island boundary is easy to recognize.",
+      "targetReaction": "bad_dance",
+      "camera": "brief_focus"
+    },
+    "done": {
+      "effect": "result_reveal",
+      "durationMs": 700,
+      "color": "#FFF3B0",
+      "explanation": "Reveal the verified island count after all grid cells have been considered.",
+      "targetReaction": "brief_focus",
+      "camera": "none"
+    }
+  },
+  "resultChoreography": {
+    "success": {
+      "effect": "confetti",
+      "entityReaction": "bad_dance",
+      "explanation": "Celebrate that execution completed and the computed island count matches the expected result."
+    },
+    "failure": {
+      "effect": "failure_deflate",
+      "entityReaction": "confused_stare",
+      "explanation": "If execution fails on another input, deflate the scene while preserving the final grid for inspection."
+    }
+  },
+  "intro": [
+    {
+      "action": "show_grid",
+      "durationMs": 600,
+      "text": "Land and water map"
+    },
+    {
+      "action": "show_title",
+      "durationMs": 700,
+      "text": "Number of Islands"
+    },
+    {
+      "action": "camera_pan",
+      "durationMs": 800,
+      "text": "DFS visits connected land before counting the next island"
+    }
+  ],
+  "published": true
+}

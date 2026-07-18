@@ -1,4 +1,7 @@
-"""Instrumented multi-source DFS for Pacific Atlantic Water Flow."""
+"""Instrumented multi-source DFS for Pacific Atlantic Water Flow.
+
+Emits shared grid events: init, visit, reachability_update, path_mark, done.
+"""
 
 from __future__ import annotations
 
@@ -37,6 +40,13 @@ def solve(heights: list[list[int]]) -> dict[str, Any]:
             return
         visited.add((r, c))
         emit("visit", row=r, col=c, ocean=ocean, height=heights[r][c])
+        emit(
+            "reachability_update",
+            row=r,
+            col=c,
+            ocean=ocean,
+            height=heights[r][c],
+        )
         h = heights[r][c]
         dfs(r + 1, c, visited, ocean, h)
         dfs(r - 1, c, visited, ocean, h)
@@ -52,7 +62,7 @@ def solve(heights: list[list[int]]) -> dict[str, Any]:
 
     both = sorted(pacific & atlantic)
     for r, c in both:
-        emit("both", row=r, col=c)
+        emit("path_mark", row=r, col=c, value=heights[r][c], ocean="both")
 
     result = [[r, c] for r, c in both]
     emit("done", result=result)

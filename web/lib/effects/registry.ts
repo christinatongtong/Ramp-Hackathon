@@ -3,34 +3,44 @@
  * Unknown effects no-op safely so GPT cannot crash the renderer.
  */
 
+import { SUPPORTED_EFFECTS } from "@/lib/capabilities";
+
 export type EffectHandler = {
-  /** Whether this effect should pulse active cells */
+  /** Whether this effect should pulse active cells via entity scale */
   pulse: boolean;
   /** Optional status label override */
   label?: string;
+  /** Which overlay component to mount */
+  overlay:
+    | "none"
+    | "cell_pulse"
+    | "bounce"
+    | "queue_glow"
+    | "infection_poof"
+    | "island_discovery"
+    | "frontier_wave"
+    | "path_reveal"
+    | "result_reveal"
+    | "confetti"
+    | "failure_deflate";
 };
 
 const REGISTRY: Record<string, EffectHandler> = {
-  none: { pulse: false },
-  pulse: { pulse: true },
-  bounce: { pulse: true },
-  wobble: { pulse: true },
-  squish: { pulse: true },
-  cell_pulse: { pulse: true },
-  queue_glow: { pulse: true, label: "Queue" },
-  infection_poof: { pulse: true, label: "Infect" },
-  infection_wave: { pulse: true, label: "Infect" },
-  transform_entity: { pulse: true },
-  island_discovery: { pulse: true },
-  frontier_wave: { pulse: true },
-  frontier_expand: { pulse: true },
-  path_reveal: { pulse: true },
-  water_flow: { pulse: false },
-  dual_ocean_glow: { pulse: true },
-  result_reveal: { pulse: false },
-  confetti: { pulse: false, label: "Success!" },
-  failure_deflate: { pulse: false, label: "Not quite…" },
-  camera_shake: { pulse: false },
+  none: { pulse: false, overlay: "none" },
+  cell_pulse: { pulse: true, overlay: "cell_pulse" },
+  bounce: { pulse: true, overlay: "bounce" },
+  queue_glow: { pulse: true, label: "Queue", overlay: "queue_glow" },
+  infection_poof: { pulse: true, label: "Infect", overlay: "infection_poof" },
+  island_discovery: { pulse: false, overlay: "island_discovery" },
+  frontier_wave: { pulse: true, overlay: "frontier_wave" },
+  path_reveal: { pulse: true, overlay: "path_reveal" },
+  result_reveal: { pulse: false, label: "Result", overlay: "result_reveal" },
+  confetti: { pulse: false, label: "Success!", overlay: "confetti" },
+  failure_deflate: {
+    pulse: false,
+    label: "Not quite…",
+    overlay: "failure_deflate",
+  },
 };
 
 export function resolveEffect(name: string | null | undefined): EffectHandler {
@@ -39,5 +49,5 @@ export function resolveEffect(name: string | null | undefined): EffectHandler {
 }
 
 export function isKnownEffect(name: string): boolean {
-  return name in REGISTRY;
+  return SUPPORTED_EFFECTS.has(name) || name in REGISTRY;
 }

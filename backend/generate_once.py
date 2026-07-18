@@ -61,6 +61,10 @@ def main() -> None:
         # create_animation_package already saved when save=True; confirm path.
         save_visual_plan(arguments.problem_id, package.visualPlan)
         print(f"Saved visual plan → src/problems/{arguments.problem_id}/animation.json")
+        print(
+            f"Next: python -m backend.preview {arguments.problem_id} && "
+            f"python -m backend.publish {arguments.problem_id}"
+        )
 
     print("\nGeneratedVisualPlan:\n")
     print(plan_json)
