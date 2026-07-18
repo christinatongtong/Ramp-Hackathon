@@ -19,6 +19,9 @@ Common trace events:
 - `dequeue`: A cell leaves a BFS queue.
 - `cell_update`: A cell changes value or state.
 - `level_start`: A new BFS level or minute begins.
+- `island_start`: A new connected component begins (DFS flood-fill).
+- `island_complete`: A connected component is fully explored.
+- `both`: A height cell is reachable from Pacific and Atlantic.
 - `path`: A cell belongs to the final path.
 - `done`: Execution completes.
 
