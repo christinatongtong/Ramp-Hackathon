@@ -12,6 +12,7 @@ from backend.problem_loader import get_problem_detail, list_problems, load_probl
 from backend.runner_service import UserCodeNotEnabledError, run_submission, run_solution
 from backend.schemas import (
     AnimationPackage,
+    BuildResponse,
     ClientAnimationPackage,
     ExecutionResult,
     GenerateAnimationRequest,
@@ -122,6 +123,32 @@ def create_trace(
         raise HTTPException(status_code=501, detail=str(error)) from error
     except (FileNotFoundError, ValueError, RuntimeError) as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
+
+
+@app.post(
+    "/api/problems/{problem_id}/build",
+    response_model=BuildResponse,
+)
+def build_problem_endpoint(
+    problem_id: str,
+    exampleIndex: int | None = Query(default=None),
+    style: str = Query(default="derpy"),
+    publish: bool = Query(default=True),
+) -> BuildResponse:
+    """One-call: analyze trace → GPT semantic+visual → validate → publish."""
+
+    try:
+        from backend.problem_builder import build_problem
+
+        return build_problem(
+            problem_id,
+            example_index=exampleIndex,
+            style=style,
+            publish=publish,
+        )
+    except (FileNotFoundError, ValueError, RuntimeError) as error:
+        status = 404 if "Unknown problem" in str(error) else 400
+        raise HTTPException(status_code=status, detail=str(error)) from error
 
 
 @app.post(

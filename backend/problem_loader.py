@@ -62,18 +62,21 @@ def load_problem(problem_id: str) -> ProblemPackage:
 
 
 def list_problem_ids() -> list[str]:
-    registry_path = get_settings().problems_root / "registry.json"
+    """Discover problem packages by directory (no manual registry edit)."""
 
-    if not registry_path.exists():
-        raise FileNotFoundError(f"Missing registry: {registry_path}")
+    problems_root = get_settings().problems_root
+    if not problems_root.is_dir():
+        raise FileNotFoundError(f"Missing problems root: {problems_root}")
 
-    payload = json.loads(registry_path.read_text(encoding="utf-8"))
-    problems = payload.get("problems")
-
-    if not isinstance(problems, list) or not all(isinstance(item, str) for item in problems):
-        raise ValueError("registry.json must contain a string list under 'problems'.")
-
-    return problems
+    ids: list[str] = []
+    for path in sorted(problems_root.iterdir()):
+        if not path.is_dir():
+            continue
+        if path.name.startswith(".") or path.name.startswith("_"):
+            continue
+        if (path / "problem.md").exists() and (path / "solution.py").exists():
+            ids.append(path.name)
+    return ids
 
 
 def list_problems() -> list[ProblemSummary]:
@@ -91,34 +94,39 @@ def list_problems() -> list[ProblemSummary]:
                 category=str(config.get("category", "unknown")),
                 algorithm=list(config.get("algorithm", [])),
                 number=int(number) if isinstance(number, int) else None,
-                hasVisualPlan=_has_visual_plan_file(problem_id),
+                hasVisualPlan=is_problem_unlocked(problem_id),
             )
         )
 
     return summaries
 
 
-def _has_visual_plan_file(problem_id: str) -> bool:
-    """Hub unlock: published animation.json that passes capability checks."""
+def is_problem_unlocked(problem_id: str) -> bool:
+    """Hub unlock: published + valid visual plan (+ semantic when present)."""
 
-    path = get_problem_directory(problem_id) / "animation.json"
-    if not path.exists():
-        return False
-    raw = path.read_text(encoding="utf-8").strip()
-    if not raw or raw == "{}":
+    from backend.publication_store import is_published
+    from backend.visual_plan_store import load_visual_plan
+
+    if not is_published(problem_id):
         return False
     try:
-        payload = json.loads(raw)
-    except json.JSONDecodeError:
-        return False
-    if not isinstance(payload, dict) or "world" not in payload:
-        return False
-    if payload.get("published") is not True:
+        return load_visual_plan(problem_id) is not None
+    except (ValueError, FileNotFoundError):
         return False
 
-    from backend.capabilities import plan_uses_supported_capabilities
 
-    return not plan_uses_supported_capabilities(payload)
+def get_client_facts_package_parts(
+    problem_id: str,
+    example_index: int | None = None,
+) -> tuple[ProblemFacts, dict[str, Any]]:
+    facts = get_problem_facts(problem_id)
+    problem = load_problem(problem_id)
+    index = (
+        example_index
+        if example_index is not None
+        else int(problem.config.get("defaultExample", 0))
+    )
+    return facts, get_initial_state(problem.config, index)
 
 
 def get_problem_detail(problem_id: str) -> ProblemDetail:

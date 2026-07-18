@@ -1,10 +1,11 @@
 "use client";
 
-import type { Grid, VisualPlan } from "@/lib/api/types";
+import type { Grid, ProblemSemanticSpec, VisualPlan } from "@/lib/api/types";
 
 export type GridWorldProps = {
   grid: Grid;
   visualPlan: VisualPlan;
+  semanticSpec?: ProblemSemanticSpec | null;
   pulse: boolean;
   activeCell: { row: number; col: number } | null;
   dayIndex: number | null;

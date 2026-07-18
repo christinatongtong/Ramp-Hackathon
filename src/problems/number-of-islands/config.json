@@ -8,12 +8,7 @@
   "scene": {
     "type": "grid",
     "theme": "island-explorer",
-    "dimensions": 2,
-    "cellMapping": {
-      "0": "water",
-      "1": "land",
-      "#": "land"
-    }
+    "dimensions": 2
   },
   "examples": [
     {

@@ -8,17 +8,7 @@
   "scene": {
     "type": "grid",
     "theme": "ocean-heights",
-    "dimensions": 2,
-    "cellMapping": {
-      "1": "height_block",
-      "2": "height_block",
-      "3": "height_block",
-      "4": "height_block",
-      "5": "height_block",
-      "6": "height_block",
-      "7": "height_block"
-    },
-    "overlays": ["pacific-reach", "atlantic-reach", "both"]
+    "dimensions": 2
   },
   "examples": [
     {

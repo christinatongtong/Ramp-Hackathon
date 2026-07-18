@@ -10,8 +10,16 @@
     },
     "camera": {
       "mode": "isometric",
-      "position": [8.0, 10.0, 8.0],
-      "target": [0.0, 0.0, 0.0]
+      "position": [
+        8.0,
+        10.0,
+        8.0
+      ],
+      "target": [
+        0.0,
+        0.0,
+        0.0
+      ]
     },
     "props": [
       {
@@ -119,7 +127,7 @@
     {
       "action": "show_title",
       "durationMs": 700,
-      "text": "Rotting Oranges — Multi-Source BFS"
+      "text": "Rotting Oranges \u2014 Multi-Source BFS"
     },
     {
       "action": "show_grid",
@@ -131,6 +139,5 @@
       "durationMs": 650,
       "text": "All initially rotten oranges begin in the BFS queue at minute 0."
     }
-  ],
-  "published": true
+  ]
 }

@@ -54,6 +54,7 @@ function SceneContent({
     resultPassed = true,
     resultExplanation = null,
     introTitle = null,
+    semanticSpec = null,
   } = props;
 
   const boardOpenAmount = useRef(0);
@@ -96,6 +97,7 @@ function SceneContent({
       <GridEntityLayer
         grid={grid}
         entities={visualPlan.entities}
+        semanticSpec={semanticSpec}
         pulse={pulse}
         activeCell={activeCell}
         title={visualPlan.world.theme}

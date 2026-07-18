@@ -63,6 +63,19 @@ export type ResultReaction = {
   explanation: string;
 };
 
+export type StateBinding = {
+  value: string;
+  semanticKey: string;
+  label: string;
+  entityType: string;
+};
+
+export type ProblemSemanticSpec = {
+  sceneType: string;
+  inputKey: string;
+  bindings: StateBinding[];
+};
+
 export type VisualPlan = {
   world: {
     preset: WorldPreset;
@@ -84,6 +97,7 @@ export type VisualPlan = {
       advanceOn: string;
     };
   };
+  /** Entities keyed by semanticKey when semanticSpec is present, else by cell value. */
   entities: Record<string, EntityDefinition>;
   eventBindings: Record<string, EventAnimation>;
   resultChoreography: {
@@ -125,6 +139,7 @@ export type RunResponse = {
 export type ClientAnimationPackage = {
   problem: ProblemFacts;
   visualPlan: VisualPlan;
+  semanticSpec: ProblemSemanticSpec | null;
   initialState: Record<string, unknown>;
 };
 

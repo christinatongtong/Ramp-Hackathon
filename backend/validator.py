@@ -5,7 +5,6 @@ from backend.capabilities import (
     supported_presets,
     supported_primitives,
 )
-from backend.problem_loader import get_cell_mapping
 from backend.schemas import (
     ExecutionResult,
     GeneratedVisualPlan,
@@ -37,7 +36,14 @@ def validate_visual_plan(
     plan: GeneratedVisualPlan,
     problem: ProblemPackage,
     execution: ExecutionResult,
+    *,
+    observed_cell_values: set[str] | None = None,
 ) -> None:
+    """Legacy visual-plan validator (entities may be keyed by cell value).
+
+    Prefer validate_bundle for the one-call build path.
+    """
+
     errors: list[str] = []
 
     if plan.world.preset not in SUPPORTED_PRESETS:
@@ -88,9 +94,15 @@ def validate_visual_plan(
                 f"Unsupported resultChoreography.{label} effect '{reaction.effect}'."
             )
 
-    cell_mapping = get_cell_mapping(problem.config)
-    if cell_mapping:
-        missing_entities = set(cell_mapping) - set(plan.entities)
+    # Prefer observed trace values over manual config.cellMapping.
+    required_values = observed_cell_values
+    if required_values is None:
+        from backend.state_analyzer import analyze_execution
+
+        required_values = set(analyze_execution(execution).cellValues)
+
+    if required_values:
+        missing_entities = required_values - set(plan.entities)
         if missing_entities:
             errors.append(
                 "Visual plan is missing entity definitions for cell values: "

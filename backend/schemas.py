@@ -283,10 +283,25 @@ class IntroAction(StrictModel):
     text: str | None
 
 
-class EntityBinding(StrictModel):
-    """LLM-friendly list item; converted to a dict for the frontend."""
+class StateBinding(StrictModel):
+    """Maps an observed cell value to a semantic key + entity type."""
 
-    cellValue: str = Field(min_length=1, max_length=40)
+    value: str = Field(min_length=1, max_length=40)
+    semanticKey: str = Field(min_length=1, max_length=60)
+    label: str = Field(min_length=1, max_length=80)
+    entityType: PrimitiveType
+
+
+class ProblemSemanticSpec(StrictModel):
+    sceneType: Literal["grid"] = "grid"
+    inputKey: str = Field(default="grid", min_length=1, max_length=40)
+    bindings: list[StateBinding] = Field(min_length=1, max_length=40)
+
+
+class EntityBinding(StrictModel):
+    """LLM-friendly list item; converted to a dict keyed by semanticKey."""
+
+    semanticKey: str = Field(min_length=1, max_length=60)
     entity: EntityDefinition
 
 
@@ -307,12 +322,37 @@ class ParsedVisualPlan(StrictModel):
     intro: list[IntroAction] = Field(min_length=1, max_length=8)
 
 
+class ParsedProblemBundle(StrictModel):
+    """One GPT response: semantic interpretation + visual plan."""
+
+    semanticSpec: ProblemSemanticSpec
+    visualPlan: ParsedVisualPlan
+
+
 class GeneratedVisualPlan(BaseModel):
     world: WorldSpec
     entities: dict[str, EntityDefinition]
     eventBindings: dict[str, EventAnimation]
     resultChoreography: ResultChoreography
     intro: list[IntroAction]
+
+
+class GeneratedProblemBundle(BaseModel):
+    problemId: str
+    semanticSpec: ProblemSemanticSpec
+    visualPlan: GeneratedVisualPlan
+
+
+class ObservedTraceSchema(BaseModel):
+    cellValues: list[str]
+    eventTypes: list[str]
+
+
+class PublicationRecord(BaseModel):
+    status: Literal["draft", "published", "generation_failed"] = "draft"
+    generatedAt: str | None = None
+    generatorVersion: str = "1"
+    errors: list[str] = Field(default_factory=list)
 
 
 class AnimationPackage(BaseModel):
@@ -322,6 +362,7 @@ class AnimationPackage(BaseModel):
     runMode: RunMode
     execution: ExecutionResult
     visualPlan: GeneratedVisualPlan
+    semanticSpec: ProblemSemanticSpec | None = None
 
 
 class ClientAnimationPackage(BaseModel):
@@ -329,4 +370,12 @@ class ClientAnimationPackage(BaseModel):
 
     problem: ProblemFacts
     visualPlan: GeneratedVisualPlan
+    semanticSpec: ProblemSemanticSpec | None = None
     initialState: dict[str, Any]
+
+
+class BuildResponse(BaseModel):
+    problemId: str
+    status: Literal["published", "draft", "generation_failed"]
+    errors: list[str] = Field(default_factory=list)
+    package: ClientAnimationPackage | None = None

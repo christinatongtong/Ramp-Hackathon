@@ -7,6 +7,8 @@ from backend.settings import get_settings
 
 
 def generate_visual_plan(messages: list[dict]) -> GeneratedVisualPlan:
+    """Legacy visual-only generation. Prefer generate_problem_bundle."""
+
     settings = get_settings()
     client = OpenAI(api_key=settings.openai_api_key)
 
@@ -26,7 +28,9 @@ def generate_visual_plan(messages: list[dict]) -> GeneratedVisualPlan:
 
     return GeneratedVisualPlan(
         world=parsed.world,
-        entities={binding.cellValue: binding.entity for binding in parsed.entities},
+        entities={
+            binding.semanticKey: binding.entity for binding in parsed.entities
+        },
         eventBindings={
             binding.eventType: binding.animation for binding in parsed.eventBindings
         },

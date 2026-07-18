@@ -1,0 +1,24 @@
+{
+  "sceneType": "grid",
+  "inputKey": "grid",
+  "bindings": [
+    {
+      "value": "0",
+      "semanticKey": "0",
+      "label": "Water",
+      "entityType": "water"
+    },
+    {
+      "value": "1",
+      "semanticKey": "1",
+      "label": "Unvisited land",
+      "entityType": "land"
+    },
+    {
+      "value": "#",
+      "semanticKey": "#",
+      "label": "Visited land",
+      "entityType": "land"
+    }
+  ]
+}

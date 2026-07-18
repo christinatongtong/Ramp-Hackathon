@@ -134,6 +134,5 @@
       "durationMs": 800,
       "text": "DFS visits connected land before counting the next island"
     }
-  ],
-  "published": true
+  ]
 }

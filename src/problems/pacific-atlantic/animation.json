@@ -1,19 +1,19 @@
 {
   "world": {
     "preset": "island",
-    "theme": "derpy ocean heights with clear Pacific, Atlantic, and shared-reach overlays",
+    "theme": "Derpy reverse multi-source ocean reachability across a labeled elevation grid",
     "sceneType": "grid",
     "palette": {
-      "sky": "#BEEBFF",
-      "ground": "#D8C58A",
+      "sky": "#BDEBFF",
+      "ground": "#D9C88F",
       "accent": "#FFD166"
     },
     "camera": {
-      "mode": "isometric",
+      "mode": "top_down",
       "position": [
-        8.0,
-        10.0,
-        8.0
+        0.0,
+        12.0,
+        0.0
       ],
       "target": [
         0.0,
@@ -25,12 +25,12 @@
       {
         "primitive": "goofy_cloud",
         "placement": "sky",
-        "count": 3
+        "count": 2
       },
       {
         "primitive": "sign",
-        "placement": "perimeter",
-        "count": 2
+        "placement": "back",
+        "count": 1
       }
     ],
     "timeSystem": {
@@ -39,58 +39,58 @@
     }
   },
   "entities": {
-    "1": {
+    "height_1": {
       "primitive": "height_block",
-      "variant": "elevation-1",
-      "color": "#CDECCF",
+      "variant": "chunky_low_terrace",
+      "color": "#D8F3DC",
       "label": "1",
       "idleAnimation": "none",
       "expression": null
     },
-    "2": {
+    "height_2": {
       "primitive": "height_block",
-      "variant": "elevation-2",
-      "color": "#B7DFAE",
+      "variant": "chunky_terrace_2",
+      "color": "#B7E4C7",
       "label": "2",
       "idleAnimation": "none",
       "expression": null
     },
-    "3": {
+    "height_3": {
       "primitive": "height_block",
-      "variant": "elevation-3",
-      "color": "#A3D18F",
+      "variant": "chunky_terrace_3",
+      "color": "#95D5B2",
       "label": "3",
       "idleAnimation": "none",
       "expression": null
     },
-    "4": {
+    "height_4": {
       "primitive": "height_block",
-      "variant": "elevation-4",
-      "color": "#C5B978",
+      "variant": "chunky_terrace_4",
+      "color": "#74C69D",
       "label": "4",
       "idleAnimation": "none",
       "expression": null
     },
-    "5": {
+    "height_5": {
       "primitive": "height_block",
-      "variant": "elevation-5",
-      "color": "#B79B68",
+      "variant": "chunky_terrace_5",
+      "color": "#52B788",
       "label": "5",
       "idleAnimation": "none",
       "expression": null
     },
-    "6": {
+    "height_6": {
       "primitive": "height_block",
-      "variant": "elevation-6",
-      "color": "#9B7B61",
+      "variant": "chunky_terrace_6",
+      "color": "#40916C",
       "label": "6",
       "idleAnimation": "none",
       "expression": null
     },
-    "7": {
+    "height_7": {
       "primitive": "height_block",
-      "variant": "elevation-7",
-      "color": "#7D625A",
+      "variant": "chunky_high_terrace",
+      "color": "#2D6A4F",
       "label": "7",
       "idleAnimation": "none",
       "expression": null
@@ -99,42 +99,42 @@
   "eventBindings": {
     "init": {
       "effect": "cell_pulse",
-      "durationMs": 450,
+      "durationMs": 500,
       "color": "#FFFFFF",
-      "explanation": "Introduce the unchanged height map while keeping every elevation label visible.",
+      "explanation": "Reveal the unchanged height map; every labeled block represents permanent elevation data.",
       "targetReaction": "none",
       "camera": "none"
     },
     "visit": {
-      "effect": "cell_pulse",
-      "durationMs": 260,
-      "color": "#BEEBFF",
-      "explanation": "Pulse the exact cell currently accepted by the ocean-specific reverse DFS.",
+      "effect": "bounce",
+      "durationMs": 180,
+      "color": "#FFD166",
+      "explanation": "Briefly identify the cell currently accepted by the trace's reverse search from the named ocean.",
       "targetReaction": "brief_focus",
       "camera": "none"
     },
     "reachability_update": {
-      "effect": "none",
-      "durationMs": 140,
-      "color": null,
-      "explanation": "Reveal the trace-provided Pacific or Atlantic reachability overlay without moving or recoloring the underlying height block.",
-      "targetReaction": "none",
+      "effect": "cell_pulse",
+      "durationMs": 220,
+      "color": "#66D9FF",
+      "explanation": "Make the emitted ocean-specific reachability overlay visible without replacing the cell's elevation.",
+      "targetReaction": "brief_focus",
       "camera": "none"
     },
     "path_mark": {
       "effect": "path_reveal",
-      "durationMs": 420,
-      "color": "#FFD166",
-      "explanation": "Highlight each trace-marked cell that can reach both oceans, preserving emitted order.",
+      "durationMs": 400,
+      "color": "#FFE066",
+      "explanation": "Highlight a trace-marked answer cell that is reachable from both ocean searches; this is an answer set, not a reconstructed route.",
       "targetReaction": "brief_focus",
       "camera": "none"
     },
     "done": {
       "effect": "result_reveal",
-      "durationMs": 700,
+      "durationMs": 800,
       "color": "#FFD166",
-      "explanation": "Present the verified coordinate result after all shared-reach cells have been marked.",
-      "targetReaction": "brief_focus",
+      "explanation": "Reveal the completed set of cells marked by the trace as reaching both oceans.",
+      "targetReaction": "none",
       "camera": "brief_focus"
     }
   },
@@ -142,35 +142,34 @@
     "success": {
       "effect": "confetti",
       "entityReaction": "bad_dance",
-      "explanation": "Celebrate a completed verified result with a brief derpy reaction that leaves grid overlays readable."
+      "explanation": "Celebrate while leaving all both-ocean answer highlights and elevation labels unobscured."
     },
     "failure": {
       "effect": "failure_deflate",
       "entityReaction": "confused_stare",
-      "explanation": "Gently deflate the scene on failure while preserving the final grid state for inspection."
+      "explanation": "Gently deflate the presentation while preserving the final grid for inspection."
     }
   },
   "intro": [
     {
       "action": "show_title",
       "durationMs": 900,
-      "text": "Pacific Atlantic Water Flow"
+      "text": "Pacific Atlantic Water Flow: Reverse Reachability"
     },
     {
       "action": "show_grid",
-      "durationMs": 700,
-      "text": "Each labeled block shows its elevation."
-    },
-    {
-      "action": "camera_pan",
-      "durationMs": 800,
-      "text": "View the island height map and its ocean-facing edges."
+      "durationMs": 1000,
+      "text": "Each chunky labeled block is a permanent elevation; larger labels mean higher ground."
     },
     {
       "action": "highlight_sources",
-      "durationMs": 900,
-      "text": "Reverse searches begin from the Pacific and Atlantic borders."
+      "durationMs": 1200,
+      "text": "Pacific search sources lie along the top and left borders; Atlantic search sources lie along the bottom and right borders."
+    },
+    {
+      "action": "camera_pan",
+      "durationMs": 700,
+      "text": "Watch each ocean's reverse search accept equal-or-higher neighboring cells, then reveal the overlap."
     }
-  ],
-  "published": true
+  ]
 }

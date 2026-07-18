@@ -36,16 +36,17 @@ Next.js:  localhost:3000
 ## Adding a problem
 
 1. Create `src/problems/<id>/` with `problem.md`, `config.json` (include `entrypoint` + `starterCode`), `solution.py`
-2. Append `"<id>"` to `src/problems/registry.json`
-3. Generate the visual plan once:
+2. Build + publish with one GPT call (no registry or cellMapping edits):
 
 ```bash
-python -m backend.generate_once <id> --style derpy
+python -m backend.build_once <id>
+# or: curl -X POST http://localhost:8000/api/problems/<id>/build
 ```
 
-This writes presentation-only `animation.json` (no execution embedded).
+This analyzes the canonical trace, asks GPT for `semantic.json` + `animation.json`,
+validates against `visual-capabilities.json`, and writes `publication.json`.
 
-4. Open the hub at `/select` — portals with a saved visual plan are unlocked.
+3. Open `/select` — published problems unlock automatically (directory discovery).
 
 ## Dev
 
@@ -64,9 +65,10 @@ cd web && npm install && npm run dev
 ### Endpoints
 
 - `GET /health`
-- `GET /api/problems` — catalog (includes `hasVisualPlan`)
+- `GET /api/problems` — catalog (includes `hasVisualPlan` from publication status)
 - `GET /api/problems/{id}` — public problem detail (no hidden tests)
-- `GET /api/problems/{id}/package` — `{ problem, visualPlan, initialState }` (no execution)
+- `GET /api/problems/{id}/package` — `{ problem, visualPlan, semanticSpec, initialState }`
 - `POST /api/problems/{id}/run` — body `{ code, exampleIndex }` → judge user Python; returns canonical `execution` only when accepted
 - `POST /api/problems/{id}/trace` — tooling: canonical instrumented trace
-- `POST /api/problems/{id}/generate-animation?save=true` — force GPT regenerate visual plan
+- `POST /api/problems/{id}/build` — one-call: analyze → GPT semantic+visual → validate → publish
+- `POST /api/problems/{id}/generate-animation?save=true` — legacy visual-only regenerate

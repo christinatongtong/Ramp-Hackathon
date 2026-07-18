@@ -5,6 +5,7 @@ import { getPackage, runProblem } from "./client";
 import type {
   ClientAnimationPackage,
   ProblemFacts,
+  ProblemSemanticSpec,
   RunResponse,
   VisualPlan,
 } from "./types";
@@ -14,6 +15,7 @@ type UseAnimationPackageResult = {
   error: string | null;
   problem: ProblemFacts | null;
   visualPlan: VisualPlan | null;
+  semanticSpec: ProblemSemanticSpec | null;
   initialState: Record<string, unknown> | null;
   reload: () => Promise<void>;
   submit: (options: {
@@ -63,6 +65,7 @@ export function useAnimationPackage(
     error,
     problem: pkg?.problem ?? null,
     visualPlan: pkg?.visualPlan ?? null,
+    semanticSpec: pkg?.semanticSpec ?? null,
     initialState: pkg?.initialState ?? null,
     reload,
     submit,

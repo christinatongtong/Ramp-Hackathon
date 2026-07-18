@@ -48,7 +48,7 @@ function asCoordPairs(value: unknown): Array<[number, number]> | null {
 }
 
 export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
-  const { loading, error, problem, visualPlan, initialState, submit } =
+  const { loading, error, problem, visualPlan, semanticSpec, initialState, submit } =
     useAnimationPackage(problemId);
 
   const [code, setCode] = useState("");
@@ -316,6 +316,7 @@ export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
       <div className="farm-layout__world">
         <WorldRenderer
           visualPlan={visualPlan}
+          semanticSpec={semanticSpec}
           grid={grid.length ? grid : [["0"]]}
           pulse={pulse}
           activeCell={activeCell}

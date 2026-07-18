@@ -8,14 +8,7 @@
   "scene": {
     "type": "grid",
     "theme": "binary-maze",
-    "dimensions": 2,
-    "cellMapping": {
-      "0": "land",
-      "1": "wall",
-      "2": "land",
-      "3": "destination"
-    },
-    "pathOverlay": true
+    "dimensions": 2
   },
   "examples": [
     {

@@ -1,0 +1,48 @@
+{
+  "sceneType": "grid",
+  "inputKey": "heights",
+  "bindings": [
+    {
+      "value": "1",
+      "semanticKey": "height_1",
+      "label": "Elevation 1",
+      "entityType": "height_block"
+    },
+    {
+      "value": "2",
+      "semanticKey": "height_2",
+      "label": "Elevation 2",
+      "entityType": "height_block"
+    },
+    {
+      "value": "3",
+      "semanticKey": "height_3",
+      "label": "Elevation 3",
+      "entityType": "height_block"
+    },
+    {
+      "value": "4",
+      "semanticKey": "height_4",
+      "label": "Elevation 4",
+      "entityType": "height_block"
+    },
+    {
+      "value": "5",
+      "semanticKey": "height_5",
+      "label": "Elevation 5",
+      "entityType": "height_block"
+    },
+    {
+      "value": "6",
+      "semanticKey": "height_6",
+      "label": "Elevation 6",
+      "entityType": "height_block"
+    },
+    {
+      "value": "7",
+      "semanticKey": "height_7",
+      "label": "Elevation 7",
+      "entityType": "height_block"
+    }
+  ]
+}

@@ -2,7 +2,12 @@
 
 import { useMemo } from "react";
 import { Text } from "@react-three/drei";
-import type { EntityDefinition, Grid } from "@/lib/api/types";
+import type {
+  EntityDefinition,
+  Grid,
+  ProblemSemanticSpec,
+} from "@/lib/api/types";
+import { resolveEntityForCell } from "@/lib/semantic/resolveEntity";
 import { resolveEntityRenderer } from "./entityRegistry";
 import { DEFAULT_CELL_SIZE } from "./renderers/types";
 
@@ -11,6 +16,7 @@ export { DEFAULT_CELL_SIZE as CELL_SIZE };
 type GridEntityLayerProps = {
   grid: Grid;
   entities: Record<string, EntityDefinition>;
+  semanticSpec?: ProblemSemanticSpec | null;
   pulse?: boolean;
   activeCell?: { row: number; col: number } | null;
   title?: string;
@@ -25,6 +31,7 @@ function isWaterLike(primitive: string) {
 export function GridEntityLayer({
   grid,
   entities,
+  semanticSpec = null,
   pulse = false,
   activeCell = null,
   title = "Grid",
@@ -60,14 +67,7 @@ export function GridEntityLayer({
     <group position={[0, 0.05, -1]}>
       {grid.map((row, rowIndex) =>
         row.map((cell, colIndex) => {
-          const entity = entities[String(cell)] ?? {
-            primitive: "empty_tile",
-            variant: "fallback",
-            color: "#888888",
-            label: String(cell),
-            idleAnimation: "none",
-            expression: null,
-          };
+          const entity = resolveEntityForCell(cell, entities, semanticSpec);
           const primitive = entity.primitive ?? "empty_tile";
           const isActive =
             activeCell?.row === rowIndex && activeCell?.col === colIndex;
@@ -77,9 +77,7 @@ export function GridEntityLayer({
           const x = origin.x + colIndex * DEFAULT_CELL_SIZE;
           const z = origin.z + rowIndex * DEFAULT_CELL_SIZE;
           const EntityComponent = resolveEntityRenderer(primitive);
-          const floorColor = isWaterLike(primitive)
-            ? entity.color
-            : "#7cb342";
+          const floorColor = isWaterLike(primitive) ? entity.color : "#7cb342";
 
           return (
             <group key={key} position={[x, 0, z]}>

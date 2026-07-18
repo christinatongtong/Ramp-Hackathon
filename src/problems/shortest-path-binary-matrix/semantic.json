@@ -1,0 +1,30 @@
+{
+  "sceneType": "grid",
+  "inputKey": "grid",
+  "bindings": [
+    {
+      "value": "0",
+      "semanticKey": "0",
+      "label": "Open",
+      "entityType": "floor_tile"
+    },
+    {
+      "value": "1",
+      "semanticKey": "1",
+      "label": "Blocked",
+      "entityType": "wall"
+    },
+    {
+      "value": "2",
+      "semanticKey": "2",
+      "label": "Visited",
+      "entityType": "floor_tile"
+    },
+    {
+      "value": "3",
+      "semanticKey": "3",
+      "label": "Path",
+      "entityType": "floor_tile"
+    }
+  ]
+}

@@ -8,12 +8,7 @@
   "scene": {
     "type": "grid",
     "theme": "orange-warehouse",
-    "dimensions": 2,
-    "cellMapping": {
-      "0": "empty",
-      "1": "fresh-orange",
-      "2": "rotten-orange"
-    }
+    "dimensions": 2
   },
   "examples": [
     {
