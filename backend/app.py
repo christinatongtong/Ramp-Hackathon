@@ -1,10 +1,16 @@
+from __future__ import annotations
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.animation_generator import generate_animation_plan
-from backend.context_loader import load_problem, run_problem_trace
-from backend.validator import validate_animation_plan
+from backend.animation_service import create_animation_package
+from backend.problem_loader import get_problem_detail, list_problems, load_problem
+from backend.runner_service import UserCodeNotEnabledError, run_solution
+from backend.schemas import AnimationPackage, ExecutionResult, GenerateAnimationRequest
+from backend.settings import get_settings
 
+
+settings = get_settings()
 
 app = FastAPI(
     title="Algorithm World API",
@@ -13,10 +19,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ],
+    allow_origins=[settings.frontend_origin, "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -28,37 +31,61 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.post("/api/problems/{problem_id}/trace")
-def create_trace(problem_id: str) -> dict:
+@app.get("/api/problems")
+def get_problems():
     try:
-        load_problem(problem_id)
-        return run_problem_trace(problem_id)
-    except (FileNotFoundError, ValueError, RuntimeError) as error:
-        raise HTTPException(status_code=400, detail=str(error)) from error
-    except Exception as error:
+        return list_problems()
+    except (FileNotFoundError, ValueError) as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
 
 
-@app.post("/api/problems/{problem_id}/generate-animation")
-def create_animation(problem_id: str, save: bool = True) -> dict:
+@app.get("/api/problems/{problem_id}")
+def get_problem(problem_id: str):
+    try:
+        return get_problem_detail(problem_id)
+    except (FileNotFoundError, ValueError) as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+
+
+@app.post(
+    "/api/problems/{problem_id}/trace",
+    response_model=ExecutionResult,
+)
+def create_trace(
+    problem_id: str,
+    request: GenerateAnimationRequest | None = None,
+) -> ExecutionResult:
+    body = request or GenerateAnimationRequest()
+
     try:
         problem = load_problem(problem_id)
-        trace = run_problem_trace(problem_id)
-        plan = generate_animation_plan(problem, trace)
-        validate_animation_plan(plan, problem, trace)
+        return run_solution(
+            problem,
+            example_index=body.exampleIndex,
+            user_code=body.userCode,
+        )
+    except UserCodeNotEnabledError as error:
+        raise HTTPException(status_code=501, detail=str(error)) from error
+    except (FileNotFoundError, ValueError, RuntimeError) as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
 
-        if save:
-            output_path = problem["directory"] / "animation.json"
-            output_path.write_text(
-                plan.model_dump_json(indent=2) + "\n",
-                encoding="utf-8",
-            )
 
-        return {
-            "problem_id": problem_id,
-            "trace_event_count": len(trace.get("events", [])),
-            "animation": plan.model_dump(mode="json"),
-        }
-
+@app.post(
+    "/api/problems/{problem_id}/generate-animation",
+    response_model=AnimationPackage,
+)
+def generate_animation(
+    problem_id: str,
+    request: GenerateAnimationRequest,
+) -> AnimationPackage:
+    try:
+        return create_animation_package(
+            problem_id=problem_id,
+            example_index=request.exampleIndex,
+            user_code=request.userCode,
+            style=request.style,
+        )
+    except UserCodeNotEnabledError as error:
+        raise HTTPException(status_code=501, detail=str(error)) from error
     except (FileNotFoundError, ValueError, RuntimeError) as error:
         raise HTTPException(status_code=400, detail=str(error)) from error

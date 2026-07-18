@@ -1,0 +1,305 @@
+{
+  "problemId": "rotting-oranges",
+  "runMode": "canonical",
+  "execution": {
+    "result": 4,
+    "expected": 4,
+    "passed": true,
+    "initialState": {
+      "grid": [
+        [
+          2,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          0
+        ],
+        [
+          0,
+          1,
+          1
+        ]
+      ]
+    },
+    "finalState": {
+      "grid": [
+        [
+          2,
+          2,
+          2
+        ],
+        [
+          2,
+          2,
+          0
+        ],
+        [
+          0,
+          2,
+          2
+        ]
+      ]
+    },
+    "events": [
+      {
+        "type": "init",
+        "grid": [
+          [
+            2,
+            1,
+            1
+          ],
+          [
+            1,
+            1,
+            0
+          ],
+          [
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      {
+        "type": "enqueue",
+        "row": 0,
+        "col": 0,
+        "value": 2,
+        "minute": 0
+      },
+      {
+        "type": "dequeue",
+        "row": 0,
+        "col": 0,
+        "minute": 0
+      },
+      {
+        "type": "cell_update",
+        "row": 0,
+        "col": 1,
+        "value": 2,
+        "from_value": 1,
+        "minute": 1
+      },
+      {
+        "type": "enqueue",
+        "row": 0,
+        "col": 1,
+        "value": 2,
+        "minute": 1
+      },
+      {
+        "type": "cell_update",
+        "row": 1,
+        "col": 0,
+        "value": 2,
+        "from_value": 1,
+        "minute": 1
+      },
+      {
+        "type": "enqueue",
+        "row": 1,
+        "col": 0,
+        "value": 2,
+        "minute": 1
+      },
+      {
+        "type": "dequeue",
+        "row": 0,
+        "col": 1,
+        "minute": 1
+      },
+      {
+        "type": "cell_update",
+        "row": 0,
+        "col": 2,
+        "value": 2,
+        "from_value": 1,
+        "minute": 2
+      },
+      {
+        "type": "enqueue",
+        "row": 0,
+        "col": 2,
+        "value": 2,
+        "minute": 2
+      },
+      {
+        "type": "cell_update",
+        "row": 1,
+        "col": 1,
+        "value": 2,
+        "from_value": 1,
+        "minute": 2
+      },
+      {
+        "type": "enqueue",
+        "row": 1,
+        "col": 1,
+        "value": 2,
+        "minute": 2
+      },
+      {
+        "type": "dequeue",
+        "row": 1,
+        "col": 0,
+        "minute": 1
+      },
+      {
+        "type": "dequeue",
+        "row": 0,
+        "col": 2,
+        "minute": 2
+      },
+      {
+        "type": "dequeue",
+        "row": 1,
+        "col": 1,
+        "minute": 2
+      },
+      {
+        "type": "cell_update",
+        "row": 2,
+        "col": 1,
+        "value": 2,
+        "from_value": 1,
+        "minute": 3
+      },
+      {
+        "type": "enqueue",
+        "row": 2,
+        "col": 1,
+        "value": 2,
+        "minute": 3
+      },
+      {
+        "type": "dequeue",
+        "row": 2,
+        "col": 1,
+        "minute": 3
+      },
+      {
+        "type": "cell_update",
+        "row": 2,
+        "col": 2,
+        "value": 2,
+        "from_value": 1,
+        "minute": 4
+      },
+      {
+        "type": "enqueue",
+        "row": 2,
+        "col": 2,
+        "value": 2,
+        "minute": 4
+      },
+      {
+        "type": "dequeue",
+        "row": 2,
+        "col": 2,
+        "minute": 4
+      },
+      {
+        "type": "done",
+        "result": 4,
+        "remaining_fresh": 0
+      }
+    ]
+  },
+  "visualPlan": {
+    "scene": {
+      "type": "grid",
+      "theme": "derpy-orange-warehouse",
+      "backgroundColor": "#2B2523",
+      "camera": {
+        "mode": "isometric",
+        "position": [
+          6.0,
+          8.0,
+          6.0
+        ],
+        "target": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "entities": {
+      "0": {
+        "primitive": "empty_tile",
+        "variant": "warehouse-gap",
+        "color": "#554C47",
+        "label": "Empty cell",
+        "idleAnimation": "none"
+      },
+      "1": {
+        "primitive": "orange",
+        "variant": "fresh-derpy",
+        "color": "#FFA62B",
+        "label": "Fresh orange",
+        "idleAnimation": "gentle_bounce"
+      },
+      "2": {
+        "primitive": "orange",
+        "variant": "rotten-derpy",
+        "color": "#7A9E3A",
+        "label": "Rotten orange",
+        "idleAnimation": "sick_wobble"
+      }
+    },
+    "eventBindings": {
+      "init": {
+        "effect": "cell_pulse",
+        "durationMs": 500,
+        "color": "#FFF1C1",
+        "explanation": "Reveal the initial grid while keeping fresh, rotten, and empty cells visually distinct."
+      },
+      "enqueue": {
+        "effect": "queue_glow",
+        "durationMs": 350,
+        "color": "#FFD166",
+        "explanation": "Outline the orange when it enters the BFS queue; the event's minute indicates its infection layer."
+      },
+      "dequeue": {
+        "effect": "cell_pulse",
+        "durationMs": 300,
+        "color": "#70D6FF",
+        "explanation": "Pulse the orange currently removed from the queue and examined for adjacent fresh oranges."
+      },
+      "cell_update": {
+        "effect": "infection_wave",
+        "durationMs": 650,
+        "color": "#9ACD32",
+        "explanation": "Show infection reaching the updated cell, then present its change from a fresh orange to a rotten orange."
+      },
+      "done": {
+        "effect": "result_reveal",
+        "durationMs": 900,
+        "color": "#F4D35E",
+        "explanation": "Reveal the traced result and remaining-fresh count without covering the final grid."
+      }
+    },
+    "intro": [
+      {
+        "action": "show_title",
+        "durationMs": 700,
+        "text": "Rotting Oranges — Multi-Source BFS"
+      },
+      {
+        "action": "show_grid",
+        "durationMs": 700,
+        "text": "Fresh oranges are orange, rotten oranges are green, and gaps are empty."
+      },
+      {
+        "action": "highlight_sources",
+        "durationMs": 650,
+        "text": "These rotten oranges begin in the BFS queue at minute 0."
+      }
+    ]
+  }
+}
