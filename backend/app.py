@@ -1,12 +1,19 @@
 from __future__ import annotations
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.animation_service import create_animation_package
+from backend.animation_service import create_animation_package, get_client_package
 from backend.problem_loader import get_problem_detail, list_problems, load_problem
-from backend.runner_service import UserCodeNotEnabledError, run_solution
-from backend.schemas import AnimationPackage, ExecutionResult, GenerateAnimationRequest
+from backend.runner_service import UserCodeNotEnabledError, run_submission, run_solution
+from backend.schemas import (
+    AnimationPackage,
+    ClientAnimationPackage,
+    ExecutionResult,
+    GenerateAnimationRequest,
+    RunRequest,
+    RunResponse,
+)
 from backend.settings import get_settings
 
 
@@ -47,6 +54,47 @@ def get_problem(problem_id: str):
         raise HTTPException(status_code=404, detail=str(error)) from error
 
 
+@app.get(
+    "/api/problems/{problem_id}/package",
+    response_model=ClientAnimationPackage,
+)
+def get_package(
+    problem_id: str,
+    exampleIndex: int | None = Query(default=None),
+    force: bool = Query(default=False),
+    style: str = Query(default="derpy"),
+) -> ClientAnimationPackage:
+    try:
+        return get_client_package(
+            problem_id,
+            example_index=exampleIndex,
+            force_visual=force,
+            style=style,
+        )
+    except UserCodeNotEnabledError as error:
+        raise HTTPException(status_code=501, detail=str(error)) from error
+    except (FileNotFoundError, ValueError, RuntimeError) as error:
+        status = 404 if "Unknown problem" in str(error) else 400
+        raise HTTPException(status_code=status, detail=str(error)) from error
+
+
+@app.post(
+    "/api/problems/{problem_id}/run",
+    response_model=RunResponse,
+)
+def run_problem(problem_id: str, request: RunRequest) -> RunResponse:
+    try:
+        problem = load_problem(problem_id)
+        return run_submission(
+            problem,
+            code=request.code,
+            example_index=request.exampleIndex,
+        )
+    except (FileNotFoundError, ValueError, RuntimeError) as error:
+        status = 404 if "Unknown problem" in str(error) else 400
+        raise HTTPException(status_code=status, detail=str(error)) from error
+
+
 @app.post(
     "/api/problems/{problem_id}/trace",
     response_model=ExecutionResult,
@@ -77,6 +125,7 @@ def create_trace(
 def generate_animation(
     problem_id: str,
     request: GenerateAnimationRequest,
+    save: bool = Query(default=False),
 ) -> AnimationPackage:
     try:
         return create_animation_package(
@@ -84,6 +133,8 @@ def generate_animation(
             example_index=request.exampleIndex,
             user_code=request.userCode,
             style=request.style,
+            force=True,
+            save=save,
         )
     except UserCodeNotEnabledError as error:
         raise HTTPException(status_code=501, detail=str(error)) from error

@@ -2,6 +2,22 @@
 
 Use a grid scene for matrix, maze, flood-fill, island, and cellular problems.
 
+## World presets
+
+Choose a `world.preset` the frontend already knows how to render:
+
+- `farm` — orchards, fruit, day/night (e.g. rotting oranges)
+- `island` — land/water islands
+- `mountain` — height maps and elevation
+- `maze` — walls and paths
+- `generic_grid` — fallback grid world
+
+Set `world.sceneType` to match `config.scene.type` (`grid` or `height_map`).
+
+Fill `world.palette` (sky, ground, accent), optional `world.props` from supported
+primitives (`tree`, `cloud`, `goofy_cloud`, `fence`, `sign`, …), and
+`world.timeSystem` when BFS minutes should advance day/night.
+
 ## Visual priorities
 
 1. Current cell

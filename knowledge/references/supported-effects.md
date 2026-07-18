@@ -1,17 +1,28 @@
 # Supported effects
 
-## cell_pulse
+Use only effects from the response schema. Unlisted names are rejected.
 
-Briefly changes a cell's scale and glow. Use for `visit`.
+## pulse / cell_pulse
+
+Briefly changes a cell's scale and glow. Use for `visit` or `init`.
+
+## bounce
+
+A short vertical bounce. Use for `dequeue` or playful highlights.
+
+## wobble / squish
+
+Organic squash reactions. Prefer as `targetReaction`, not as the primary
+effect, unless the event is purely decorative.
 
 ## queue_glow
 
 Adds a visible border or hovering marker. Use when a cell enters the queue.
 
-## infection_wave
+## infection_poof / infection_wave
 
-Creates a directional wave from an infected source to a target. Use when
-infection spreads.
+Shows infection spreading into a fresh cell. Prefer `infection_poof` for
+discrete cell updates; use `infection_wave` when directionality helps.
 
 ## transform_entity
 
@@ -21,7 +32,7 @@ Transitions an entity from one configured state into another.
 
 Changes connected terrain to an island-specific color.
 
-## frontier_expand
+## frontier_wave / frontier_expand
 
 Displays a BFS frontier spreading across neighboring cells.
 
@@ -40,5 +51,10 @@ Highlights cells reachable from both oceans.
 ## result_reveal
 
 Displays the final result after the `done` event.
+
+## confetti / failure_deflate / camera_shake
+
+Result choreography only. Bind these under `resultChoreography`, not as
+algorithm event effects, unless the trace itself has a matching event.
 
 Effects must clarify an actual trace event. Do not add effects solely for noise.

@@ -33,5 +33,12 @@
     }
   ],
   "solutionFile": "solution.py",
-  "defaultExample": 1
+  "defaultExample": 1,
+  "entrypoint": {
+    "language": "python",
+    "className": "Solution",
+    "methodName": "shortestPathBinaryMatrix",
+    "arguments": ["grid"]
+  },
+  "starterCode": "from typing import List\n\nclass Solution:\n    def shortestPathBinaryMatrix(self, grid: List[List[int]]) -> int:\n        # Write your solution here\n        pass\n"
 }

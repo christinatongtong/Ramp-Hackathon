@@ -6,13 +6,14 @@ import { Text } from "@react-three/drei";
 import * as THREE from "three";
 import { Character } from "@/components/shared/Character";
 import { useAvatar } from "@/components/providers/AvatarProvider";
-import { PROBLEMS, type ProblemEntry } from "@/lib/problems/catalog";
+import type { ProblemEntry } from "@/lib/problems/catalog";
 
 const MOVE_SPEED = 4;
 const PLATFORM_RADIUS = 8;
 const ENTER_RADIUS = 2.3;
 
 type SelectSceneProps = {
+  problems: ProblemEntry[];
   transporting: boolean;
   target: ProblemEntry | null;
   nearbyId: string | null;
@@ -45,7 +46,7 @@ function GoofyCloud({
   );
 }
 
-function HubPlatform() {
+function HubPlatform({ problems }: { problems: ProblemEntry[] }) {
   return (
     <>
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow position={[0, -0.04, 0]}>
@@ -68,7 +69,7 @@ function HubPlatform() {
         <meshStandardMaterial color="#ffd93d" emissive="#ffd93d" emissiveIntensity={0.15} />
       </mesh>
 
-      {PROBLEMS.map((problem) => {
+      {problems.map((problem) => {
         const angle = Math.atan2(problem.position[0], problem.position[2]);
         const dist = Math.hypot(problem.position[0], problem.position[2]) * 0.55;
         return (
@@ -218,6 +219,7 @@ function WarpTunnel({ active, color, position }: { active: boolean; color: strin
 }
 
 function HubPlayer({
+  problems,
   transporting,
   target,
   nearbyId,
@@ -312,7 +314,7 @@ function HubPlayer({
     let closest: ProblemEntry | null = null;
     let closestDist = ENTER_RADIUS;
 
-    for (const problem of PROBLEMS) {
+    for (const problem of problems) {
       const dx = player.position.x - problem.position[0];
       const dz = player.position.z - problem.position[2];
       const dist = Math.hypot(dx, dz);
@@ -346,7 +348,7 @@ function HubPlayer({
         position={[0, 0, 5]}
         rotationY={Math.PI}
       />
-      {PROBLEMS.map((problem) => (
+      {problems.map((problem) => (
         <WorldPortal
           key={problem.id}
           problem={problem}
@@ -383,7 +385,7 @@ function SceneContent(props: SelectSceneProps) {
         <meshStandardMaterial color="#5bb83a" />
       </mesh>
 
-      <HubPlatform />
+      <HubPlatform problems={props.problems} />
       <HubPlayer {...props} />
     </>
   );

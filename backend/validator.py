@@ -3,6 +3,7 @@ from __future__ import annotations
 from backend.problem_loader import get_cell_mapping
 from backend.schemas import (
     SUPPORTED_EFFECTS,
+    SUPPORTED_PRESETS,
     SUPPORTED_PRIMITIVES,
     ExecutionResult,
     GeneratedVisualPlan,
@@ -33,6 +34,16 @@ def validate_visual_plan(
 ) -> None:
     errors: list[str] = []
 
+    if plan.world.preset not in SUPPORTED_PRESETS:
+        errors.append(f"Unsupported world preset '{plan.world.preset}'.")
+
+    for prop in plan.world.props:
+        if prop.primitive not in SUPPORTED_PRIMITIVES:
+            errors.append(
+                f"Unsupported prop primitive '{prop.primitive}' "
+                f"(placement={prop.placement})."
+            )
+
     trace_event_types = get_trace_event_types(execution)
     bound_event_types = set(plan.eventBindings)
 
@@ -62,6 +73,15 @@ def validate_visual_plan(
                 f"Intro action '{action.action}' durationMs must be between 100 and 3000."
             )
 
+    for label, reaction in (
+        ("success", plan.resultChoreography.success),
+        ("failure", plan.resultChoreography.failure),
+    ):
+        if reaction.effect not in SUPPORTED_EFFECTS:
+            errors.append(
+                f"Unsupported resultChoreography.{label} effect '{reaction.effect}'."
+            )
+
     cell_mapping = get_cell_mapping(problem.config)
     if cell_mapping:
         missing_entities = set(cell_mapping) - set(plan.entities)
@@ -79,14 +99,12 @@ def validate_visual_plan(
             )
 
     configured_scene_type = problem.config.get("scene", {}).get("type")
-    if configured_scene_type and plan.scene.type != configured_scene_type:
+    if configured_scene_type and plan.world.sceneType != configured_scene_type:
         errors.append(
-            f"Plan scene type '{plan.scene.type}' does not match configured "
+            f"Plan scene type '{plan.world.sceneType}' does not match configured "
             f"scene type '{configured_scene_type}'."
         )
 
-    # Presentation-only: reject accidental algorithm fields if present as extras
-    # (StrictModel already forbids extras on nested models.)
     forbidden_plan_keys = {
         "events",
         "result",

@@ -33,5 +33,12 @@
     }
   ],
   "solutionFile": "solution.py",
-  "defaultExample": 0
+  "defaultExample": 0,
+  "entrypoint": {
+    "language": "python",
+    "className": "Solution",
+    "methodName": "pacificAtlantic",
+    "arguments": ["heights"]
+  },
+  "starterCode": "from typing import List\n\nclass Solution:\n    def pacificAtlantic(self, heights: List[List[int]]) -> List[List[int]]:\n        # Write your solution here\n        pass\n"
 }

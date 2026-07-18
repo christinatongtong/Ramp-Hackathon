@@ -25,10 +25,11 @@ def generate_visual_plan(messages: list[dict]) -> GeneratedVisualPlan:
     parsed = response.output_parsed
 
     return GeneratedVisualPlan(
-        scene=parsed.scene,
+        world=parsed.world,
         entities={binding.cellValue: binding.entity for binding in parsed.entities},
         eventBindings={
             binding.eventType: binding.animation for binding in parsed.eventBindings
         },
+        resultChoreography=parsed.resultChoreography,
         intro=parsed.intro,
     )

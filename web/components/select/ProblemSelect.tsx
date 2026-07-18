@@ -4,7 +4,8 @@ import { Fredoka } from "next/font/google";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import dynamic from "next/dynamic";
-import { PROBLEMS, type ProblemEntry } from "@/lib/problems/catalog";
+import { listProblems } from "@/lib/api/client";
+import { toProblemEntries, type ProblemEntry } from "@/lib/problems/catalog";
 
 const SelectScene = dynamic(
   () => import("./SelectScene").then((mod) => mod.SelectScene),
@@ -59,10 +60,30 @@ function WorldRosterCard({
 
 export function ProblemSelect() {
   const router = useRouter();
+  const [problems, setProblems] = useState<ProblemEntry[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [transporting, setTransporting] = useState(false);
   const [target, setTarget] = useState<ProblemEntry | null>(null);
   const [nearbyProblem, setNearbyProblem] = useState<ProblemEntry | null>(null);
   const [fadeOut, setFadeOut] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    listProblems()
+      .then((summaries) => {
+        if (!cancelled) setProblems(toProblemEntries(summaries));
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setLoadError(
+            err instanceof Error ? err.message : "Failed to load problems",
+          );
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleEnter = useCallback(
     (problem: ProblemEntry) => {
@@ -81,7 +102,8 @@ export function ProblemSelect() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.code !== "KeyY" || transporting || !nearbyProblem?.available) return;
+      if (event.code !== "KeyY" || transporting || !nearbyProblem?.available)
+        return;
       handleEnter(nearbyProblem);
     };
 
@@ -89,11 +111,30 @@ export function ProblemSelect() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [handleEnter, nearbyProblem, transporting]);
 
+  if (loadError) {
+    return (
+      <div className={`select-root ${fredoka.className}`}>
+        <div className="select-root select-root--loading">
+          <p>Could not reach the backend</p>
+          <p style={{ opacity: 0.7, fontSize: 14 }}>{loadError}</p>
+          <p style={{ opacity: 0.7, fontSize: 13 }}>
+            Start the API on localhost:8000
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (problems.length === 0) {
+    return <HubLoader />;
+  }
+
   return (
     <div className={`select-root ${fredoka.className}`}>
       <div className="select-vignette" aria-hidden />
 
       <SelectScene
+        problems={problems}
         transporting={transporting}
         target={target}
         nearbyId={nearbyProblem?.id ?? null}
@@ -119,7 +160,7 @@ export function ProblemSelect() {
 
           <aside className="select-roster">
             <p className="select-roster__label">World roster</p>
-            {PROBLEMS.map((problem) => (
+            {problems.map((problem) => (
               <WorldRosterCard
                 key={problem.id}
                 problem={problem}
@@ -162,7 +203,8 @@ export function ProblemSelect() {
               <p className="select-prompt__label">Portal sealed</p>
               <h2 className="select-prompt__title">{nearbyProblem.title}</h2>
               <p className="select-prompt__theme">
-                This world is still under construction. Try Rotting Oranges for now.
+                This world needs a saved visual plan. Generate animation.json
+                first.
               </p>
             </>
           )}

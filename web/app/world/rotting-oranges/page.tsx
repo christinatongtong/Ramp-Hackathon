@@ -1,5 +1,5 @@
-import { RottingOrangesGame } from "@/components/rotting-oranges/RottingOrangesGame";
+import { AlgorithmGame } from "@/components/game/AlgorithmGame";
 
 export default function RottingOrangesPage() {
-  return <RottingOrangesGame />;
+  return <AlgorithmGame problemId="rotting-oranges" />;
 }

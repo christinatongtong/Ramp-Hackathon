@@ -1,3 +1,5 @@
+import type { ProblemSummary } from "@/lib/api/types";
+
 export type ProblemEntry = {
   id: string;
   number: number;
@@ -9,45 +11,33 @@ export type ProblemEntry = {
   color: string;
 };
 
-export const PROBLEMS: ProblemEntry[] = [
-  {
-    id: "rotting-oranges",
-    number: 994,
-    title: "Rotting Oranges",
-    slug: "/world/rotting-oranges",
-    available: true,
-    theme: "Orange grove farm",
-    position: [0, 0, -4.5],
-    color: "#ff8c00",
-  },
-  {
-    id: "number-of-islands",
-    number: 200,
-    title: "Number of Islands",
-    slug: null,
-    available: false,
-    theme: "Archipelago sea",
-    position: [-4, 0, -2],
-    color: "#38bdf8",
-  },
-  {
-    id: "pacific-water",
-    number: 417,
-    title: "Pacific Atlantic Water Flow",
-    slug: null,
-    available: false,
-    theme: "Coastal watershed",
-    position: [4, 0, -2],
-    color: "#22d3ee",
-  },
-  {
-    id: "shortest-path",
-    number: 743,
-    title: "Network Delay Time",
-    slug: null,
-    available: false,
-    theme: "Signal tower hills",
-    position: [0, 0, 1.5],
-    color: "#a78bfa",
-  },
+const HUB_LAYOUT: Array<{
+  position: [number, number, number];
+  color: string;
+  themeFallback: string;
+}> = [
+  { position: [0, 0, -4.5], color: "#ff8c00", themeFallback: "Algorithm world" },
+  { position: [-4, 0, -2], color: "#38bdf8", themeFallback: "Island seas" },
+  { position: [4, 0, -2], color: "#22d3ee", themeFallback: "Coastal heights" },
+  { position: [0, 0, 1.5], color: "#a78bfa", themeFallback: "Binary maze" },
+  { position: [-3, 0, 2], color: "#f472b6", themeFallback: "Mystery world" },
+  { position: [3, 0, 2], color: "#facc15", themeFallback: "Mystery world" },
 ];
+
+/** Map backend problem summaries into hub portal entries. */
+export function toProblemEntries(summaries: ProblemSummary[]): ProblemEntry[] {
+  return summaries.map((summary, index) => {
+    const layout = HUB_LAYOUT[index % HUB_LAYOUT.length];
+    const available = summary.hasVisualPlan;
+    return {
+      id: summary.id,
+      number: summary.number ?? index + 1,
+      title: summary.title,
+      slug: available ? `/world/${summary.id}` : null,
+      available,
+      theme: summary.algorithm.join(" · ") || layout.themeFallback,
+      position: layout.position,
+      color: layout.color,
+    };
+  });
+}

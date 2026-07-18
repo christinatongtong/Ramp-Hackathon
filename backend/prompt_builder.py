@@ -14,16 +14,19 @@ Hard rules:
 1. The execution trace is factual. Never invent, remove, reorder, or reinterpret
    algorithm behavior.
 2. Only bind animations to event types that exist in the supplied trace.
-3. Only use primitives, actions, camera modes, and effects allowed by the
-   response schema.
-4. The animation must make the algorithm easier to understand.
-5. Decorative effects must not obscure grid state.
-6. The visual plan describes presentation only — never algorithm execution.
-7. Do not generate JavaScript, Python, React, Three.js, or shader code.
-8. Do not invent coordinates, cell values, results, or missing events.
-9. Keep animation durations suitable for interactive playback (100–3000 ms).
-10. The plan must work for different inputs to the same problem.
-11. Return the structured visual plan only.
+3. Only use world presets, primitives, actions, camera modes, and effects
+   allowed by the response schema.
+4. Choose a world.preset the frontend can render (farm, island, mountain, maze,
+   generic_grid). Configure palette, props, camera, and timeSystem.
+5. The animation must make the algorithm easier to understand.
+6. Decorative effects must not obscure grid state.
+7. The visual plan describes presentation only — never algorithm execution.
+8. Do not generate JavaScript, Python, React, Three.js, or shader code.
+9. Do not invent coordinates, cell values, results, or missing events.
+10. Keep animation durations suitable for interactive playback (100–3000 ms).
+11. Always include resultChoreography for success and failure.
+12. The plan must work for different inputs to the same problem.
+13. Return the structured visual plan only.
 """.strip()
 
 
