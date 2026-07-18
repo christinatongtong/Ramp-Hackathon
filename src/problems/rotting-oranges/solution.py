@@ -20,7 +20,7 @@ def solve(grid: list[list[int]]) -> dict[str, Any]:
     def emit(event_type: str, **payload: Any) -> None:
         events.append({"type": event_type, **payload})
 
-    emit("init", grid=deepcopy(grid))
+    emit("init", structure="grid", grid=deepcopy(grid))
 
     for r in range(rows):
         for c in range(cols):

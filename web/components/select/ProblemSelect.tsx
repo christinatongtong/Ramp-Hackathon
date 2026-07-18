@@ -4,7 +4,12 @@ import { Fredoka } from "next/font/google";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import dynamic from "next/dynamic";
-import { listProblems } from "@/lib/api/client";
+import useSWR, { mutate } from "swr";
+import {
+  PROBLEMS_KEY,
+  buildProblem,
+  listProblems,
+} from "@/lib/api/client";
 import { toProblemEntries, type ProblemEntry } from "@/lib/problems/catalog";
 
 const SelectScene = dynamic(
@@ -60,30 +65,66 @@ function WorldRosterCard({
 
 export function ProblemSelect() {
   const router = useRouter();
-  const [problems, setProblems] = useState<ProblemEntry[]>([]);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const {
+    data: summaries,
+    error,
+    isLoading,
+  } = useSWR(PROBLEMS_KEY, listProblems, {
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+  });
+  const problems = summaries ? toProblemEntries(summaries) : [];
+  const loadError =
+    error instanceof Error ? error.message : error ? "Failed to load problems" : null;
+
   const [transporting, setTransporting] = useState(false);
   const [target, setTarget] = useState<ProblemEntry | null>(null);
   const [nearbyProblem, setNearbyProblem] = useState<ProblemEntry | null>(null);
   const [fadeOut, setFadeOut] = useState(false);
+  const [buildingId, setBuildingId] = useState<string | null>(null);
+  const [buildMessage, setBuildMessage] = useState<string | null>(null);
+
+  const refreshProblems = useCallback(async () => {
+    await mutate(PROBLEMS_KEY);
+    router.refresh();
+  }, [router]);
 
   useEffect(() => {
-    let cancelled = false;
-    listProblems()
-      .then((summaries) => {
-        if (!cancelled) setProblems(toProblemEntries(summaries));
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setLoadError(
-            err instanceof Error ? err.message : "Failed to load problems",
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        void refreshProblems();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [refreshProblems]);
+
+  const handleBuild = useCallback(
+    async (problem: ProblemEntry) => {
+      if (buildingId) return;
+      setBuildingId(problem.id);
+      setBuildMessage(`Building ${problem.title}…`);
+      try {
+        const result = await buildProblem(problem.id, { style: "derpy" });
+        await mutate(PROBLEMS_KEY);
+        router.refresh();
+        if (result.status === "published") {
+          setBuildMessage(`${problem.title} published — portal unlocked`);
+        } else {
+          setBuildMessage(
+            result.errors.join("; ") || `Build failed for ${problem.title}`,
           );
         }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+      } catch (err) {
+        setBuildMessage(
+          err instanceof Error ? err.message : "Build request failed",
+        );
+      } finally {
+        setBuildingId(null);
+      }
+    },
+    [buildingId, router],
+  );
 
   const handleEnter = useCallback(
     (problem: ProblemEntry) => {
@@ -125,7 +166,7 @@ export function ProblemSelect() {
     );
   }
 
-  if (problems.length === 0) {
+  if (isLoading || problems.length === 0) {
     return <HubLoader />;
   }
 
@@ -203,12 +244,50 @@ export function ProblemSelect() {
               <p className="select-prompt__label">Portal sealed</p>
               <h2 className="select-prompt__title">{nearbyProblem.title}</h2>
               <p className="select-prompt__theme">
-                This world needs a saved visual plan. Generate animation.json
-                first.
+                Build this world with one GPT call to unlock the portal.
               </p>
+              <button
+                type="button"
+                className="select-prompt__action"
+                style={{
+                  marginTop: 12,
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  border: "none",
+                  background: nearbyProblem.color,
+                  color: "#0f172a",
+                  fontWeight: 700,
+                  cursor: buildingId ? "wait" : "pointer",
+                }}
+                disabled={Boolean(buildingId)}
+                onClick={() => void handleBuild(nearbyProblem)}
+              >
+                {buildingId === nearbyProblem.id
+                  ? "Building…"
+                  : "Build & publish"}
+              </button>
             </>
           )}
         </div>
+      )}
+
+      {buildMessage && !transporting && (
+        <p
+          style={{
+            position: "fixed",
+            left: 24,
+            bottom: 24,
+            zIndex: 20,
+            maxWidth: 360,
+            padding: "10px 14px",
+            borderRadius: 10,
+            background: "rgba(15,23,42,0.85)",
+            color: "#f8fafc",
+            fontSize: 13,
+          }}
+        >
+          {buildMessage}
+        </p>
       )}
 
       {transporting && target && (

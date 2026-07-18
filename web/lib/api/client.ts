@@ -1,4 +1,6 @@
 import type {
+  BuildProblemRequest,
+  BuildProblemResponse,
   ClientAnimationPackage,
   ProblemSummary,
   RunResponse,
@@ -6,6 +8,8 @@ import type {
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || "http://localhost:8000";
+
+export const PROBLEMS_KEY = "/api/problems";
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
@@ -25,7 +29,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export function listProblems(): Promise<ProblemSummary[]> {
-  return apiFetch<ProblemSummary[]>("/api/problems");
+  return apiFetch<ProblemSummary[]>(PROBLEMS_KEY);
 }
 
 export function getPackage(
@@ -53,6 +57,23 @@ export function runProblem(
       body: JSON.stringify({
         code: body.code,
         exampleIndex: body.exampleIndex ?? 0,
+      }),
+    },
+  );
+}
+
+export function buildProblem(
+  problemId: string,
+  body: BuildProblemRequest = {},
+): Promise<BuildProblemResponse> {
+  return apiFetch<BuildProblemResponse>(
+    `/api/problems/${encodeURIComponent(problemId)}/build`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        style: body.style ?? "derpy",
+        force: body.force ?? false,
+        exampleIndex: body.exampleIndex ?? null,
       }),
     },
   );

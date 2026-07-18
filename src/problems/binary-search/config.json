@@ -1,0 +1,83 @@
+{
+  "id": "binary-search",
+  "number": 704,
+  "title": "Binary Search",
+  "difficulty": "Easy",
+  "category": "array",
+  "algorithm": ["binary-search", "two-pointers"],
+  "scene": {
+    "type": "array",
+    "inputKey": "nums",
+    "layout": "horizontal",
+    "dimensions": 1
+  },
+  "examples": [
+    {
+      "name": "Found in middle",
+      "input": {
+        "nums": [-1, 0, 3, 5, 9, 12],
+        "target": 9
+      },
+      "expected": 4
+    },
+    {
+      "name": "Not found",
+      "input": {
+        "nums": [-1, 0, 3, 5, 9, 12],
+        "target": 2
+      },
+      "expected": -1
+    },
+    {
+      "name": "Single hit",
+      "input": {
+        "nums": [5],
+        "target": 5
+      },
+      "expected": 0
+    }
+  ],
+  "tests": [
+    {
+      "input": {
+        "nums": [-1, 0, 3, 5, 9, 12],
+        "target": 9
+      },
+      "expected": 4,
+      "hidden": false
+    },
+    {
+      "input": {
+        "nums": [-1, 0, 3, 5, 9, 12],
+        "target": 2
+      },
+      "expected": -1,
+      "hidden": false
+    },
+    {
+      "input": {
+        "nums": [5],
+        "target": 5
+      },
+      "expected": 0,
+      "hidden": true
+    },
+    {
+      "input": {
+        "nums": [-1, 0, 3, 5, 9, 12],
+        "target": 12
+      },
+      "expected": 5,
+      "hidden": true
+    }
+  ],
+  "solutionFile": "solution.py",
+  "defaultExample": 0,
+  "entrypoint": {
+    "language": "python",
+    "className": "Solution",
+    "methodName": "search",
+    "arguments": ["nums", "target"]
+  },
+  "starterCode": "from typing import List\n\nclass Solution:\n    def search(self, nums: List[int], target: int) -> int:\n        # Write your solution here\n        pass\n"
+}

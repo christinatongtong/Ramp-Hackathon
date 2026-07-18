@@ -1,8 +1,12 @@
 {
-  "world": {
+  "structure": {
+    "type": "grid",
+    "inputKey": "grid",
+    "layout": "top_down"
+  },
+  "theme": {
     "preset": "island",
-    "theme": "derpy island explorer with clear DFS flood-fill states",
-    "sceneType": "grid",
+    "name": "derpy island explorer with clear DFS flood-fill states",
     "palette": {
       "sky": "#9EDCFF",
       "ground": "#E7C978",

@@ -12,6 +12,8 @@ from backend.problem_loader import get_problem_detail, list_problems, load_probl
 from backend.runner_service import UserCodeNotEnabledError, run_submission, run_solution
 from backend.schemas import (
     AnimationPackage,
+    BuildProblemRequest,
+    BuildProblemResponse,
     BuildResponse,
     ClientAnimationPackage,
     ExecutionResult,
@@ -31,7 +33,13 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.frontend_origin, "http://localhost:3000"],
+    allow_origins=[
+        settings.frontend_origin,
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3001",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -127,25 +135,22 @@ def create_trace(
 
 @app.post(
     "/api/problems/{problem_id}/build",
-    response_model=BuildResponse,
+    response_model=BuildProblemResponse,
 )
 def build_problem_endpoint(
     problem_id: str,
-    exampleIndex: int | None = Query(default=None),
-    style: str = Query(default="derpy"),
-    publish: bool = Query(default=True),
-) -> BuildResponse:
-    """One-call: analyze trace → GPT semantic+visual → validate → publish."""
+    request: BuildProblemRequest | None = None,
+) -> BuildProblemResponse:
+    """One-call: analyze trace → GPT semantic+visual → validate → publish.
 
+    Shares `build_and_publish_problem` with `python -m backend.build_once`.
+    """
+
+    body = request or BuildProblemRequest()
     try:
-        from backend.problem_builder import build_problem
+        from backend.problem_builder import build_from_request
 
-        return build_problem(
-            problem_id,
-            example_index=exampleIndex,
-            style=style,
-            publish=publish,
-        )
+        return build_from_request(problem_id, body)
     except (FileNotFoundError, ValueError, RuntimeError) as error:
         status = 404 if "Unknown problem" in str(error) else 400
         raise HTTPException(status_code=status, detail=str(error)) from error

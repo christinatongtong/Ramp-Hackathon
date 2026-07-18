@@ -1,0 +1,50 @@
+{
+  "id": "course-schedule",
+  "number": 207,
+  "title": "Course Schedule",
+  "difficulty": "Medium",
+  "category": "graph",
+  "algorithm": ["graph", "topological-sort", "BFS"],
+  "scene": {
+    "type": "graph",
+    "inputKey": "prerequisites"
+  },
+  "examples": [
+    {
+      "name": "One prerequisite",
+      "input": { "numCourses": 2, "prerequisites": [[1, 0]] },
+      "expected": true
+    },
+    {
+      "name": "Cycle",
+      "input": { "numCourses": 2, "prerequisites": [[1, 0], [0, 1]] },
+      "expected": false
+    }
+  ],
+  "tests": [
+    {
+      "input": { "numCourses": 2, "prerequisites": [[1, 0]] },
+      "expected": true,
+      "hidden": false
+    },
+    {
+      "input": { "numCourses": 2, "prerequisites": [[1, 0], [0, 1]] },
+      "expected": false,
+      "hidden": false
+    },
+    {
+      "input": { "numCourses": 4, "prerequisites": [[1, 0], [2, 0], [3, 1], [3, 2]] },
+      "expected": true,
+      "hidden": true
+    }
+  ],
+  "solutionFile": "solution.py",
+  "defaultExample": 0,
+  "entrypoint": {
+    "language": "python",
+    "className": "Solution",
+    "methodName": "canFinish",
+    "arguments": ["numCourses", "prerequisites"]
+  },
+  "starterCode": "from typing import List\n\nclass Solution:\n    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:\n        # Write your solution here\n        pass\n"
+}

@@ -5,8 +5,11 @@ from __future__ import annotations
 from backend.capabilities import (
     supported_effects,
     supported_entity_primitives,
+    supported_events_for,
+    supported_layouts,
     supported_presets,
     supported_primitives,
+    supported_scene_types,
 )
 from backend.schemas import (
     ExecutionResult,
@@ -24,32 +27,49 @@ def validate_bundle(
 ) -> list[str]:
     """Return validation errors (empty = ok). Does not raise."""
 
-    _ = execution
     errors: list[str] = []
     plan = bundle.visualPlan
     spec = bundle.semanticSpec
+    structure = plan.structure
+    theme = plan.theme
 
-    if plan.world.preset not in supported_presets():
-        errors.append(f"Unsupported world preset '{plan.world.preset}'.")
+    if structure.type not in supported_scene_types():
+        errors.append(f"Unsupported structure type '{structure.type}'.")
 
-    for prop in plan.world.props:
+    if observed.structureType and structure.type != observed.structureType:
+        errors.append(
+            f"Plan structure '{structure.type}' does not match trace init "
+            f"structure '{observed.structureType}'."
+        )
+
+    layout = getattr(structure, "layout", None)
+    if layout and layout not in supported_layouts(structure.type):
+        errors.append(f"Unsupported layout '{layout}' for '{structure.type}'.")
+
+    if theme.preset not in supported_presets():
+        errors.append(f"Unsupported theme preset '{theme.preset}'.")
+
+    for prop in theme.props:
         if prop.primitive not in supported_primitives():
             errors.append(
                 f"Unsupported prop primitive '{prop.primitive}' "
                 f"(placement={prop.placement})."
             )
 
+    if spec.sceneType != structure.type:
+        errors.append(
+            f"semanticSpec.sceneType '{spec.sceneType}' does not match "
+            f"structure.type '{structure.type}'."
+        )
+
     observed_values = set(observed.cellValues)
     bound_values = {binding.value for binding in spec.bindings}
     missing_values = observed_values - bound_values
     if missing_values:
         errors.append(
-            "Missing state bindings for observed cell values: "
+            "Missing state bindings for observed values: "
             + ", ".join(sorted(missing_values))
         )
-
-    extra_values = bound_values - observed_values
-    # Extra bindings are allowed (e.g. unused height levels) — no error.
 
     semantic_keys = [binding.semanticKey for binding in spec.bindings]
     if len(semantic_keys) != len(set(semantic_keys)):
@@ -59,7 +79,6 @@ def validate_bundle(
     if len(value_keys) != len(set(value_keys)):
         errors.append("semanticSpec.bindings must use unique value entries.")
 
-    entity_primitives = supported_entity_primitives()
     for binding in spec.bindings:
         if binding.entityType not in supported_primitives():
             errors.append(
@@ -78,14 +97,6 @@ def validate_bundle(
                     f"'{entity.primitive}' != binding entityType "
                     f"'{binding.entityType}'."
                 )
-            if (
-                entity.primitive not in entity_primitives
-                and entity.primitive not in supported_primitives()
-            ):
-                errors.append(
-                    f"Unsupported entity primitive '{entity.primitive}' "
-                    f"for '{binding.semanticKey}'."
-                )
 
     orphan_entities = set(plan.entities) - set(semantic_keys)
     if orphan_entities:
@@ -94,6 +105,7 @@ def validate_bundle(
             + ", ".join(sorted(orphan_entities))
         )
 
+    allowed_events = supported_events_for(structure.type)
     trace_event_types = set(observed.eventTypes)
     bound_event_types = set(plan.eventBindings)
     unknown_bindings = bound_event_types - trace_event_types
@@ -102,11 +114,19 @@ def validate_bundle(
             "Visual plan binds nonexistent trace events: "
             + ", ".join(sorted(unknown_bindings))
         )
+    unsupported_events = (bound_event_types - allowed_events) - trace_event_types
+    if unsupported_events:
+        errors.append(
+            f"Events not in {structure.type} vocabulary: "
+            + ", ".join(sorted(unsupported_events))
+        )
     if not bound_event_types:
         errors.append("Visual plan must bind at least one trace event.")
 
-    # Prefer binding the important algorithm events when present.
-    important = {"visit", "cell_update", "region_discovered", "path_mark", "done"}
+    important = {
+        "grid": {"visit", "cell_update", "region_discovered", "path_mark", "done"},
+        "array": {"compare", "pointer_move", "done", "write", "swap"},
+    }.get(structure.type, {"done"})
     missing_important = (important & trace_event_types) - bound_event_types
     if missing_important:
         errors.append(
@@ -140,15 +160,16 @@ def validate_bundle(
             )
 
     configured_scene_type = problem.config.get("scene", {}).get("type")
-    if configured_scene_type and plan.world.sceneType != configured_scene_type:
-        errors.append(
-            f"Plan scene type '{plan.world.sceneType}' does not match configured "
-            f"scene type '{configured_scene_type}'."
-        )
-    if spec.sceneType != plan.world.sceneType:
-        errors.append(
-            f"semanticSpec.sceneType '{spec.sceneType}' does not match "
-            f"visualPlan.world.sceneType '{plan.world.sceneType}'."
-        )
+    if configured_scene_type and structure.type != configured_scene_type:
+        # height_map treated as grid
+        if not (
+            configured_scene_type == "height_map" and structure.type == "grid"
+        ):
+            errors.append(
+                f"Plan structure '{structure.type}' does not match configured "
+                f"scene type '{configured_scene_type}'."
+            )
 
+    _ = execution
+    _ = supported_entity_primitives
     return errors

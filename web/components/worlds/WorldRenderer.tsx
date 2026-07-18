@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import type { GridWorldProps } from "./types";
 import type { VisualPlan } from "@/lib/api/types";
+import { getTheme } from "@/lib/api/types";
 
 const loading = (
   <div className="flex h-full items-center justify-center bg-[#7ecbff] text-slate-800">
@@ -30,11 +31,11 @@ export type WorldRendererProps = Omit<GridWorldProps, "visualPlan"> & {
 };
 
 /**
- * Selects a world preset from visualPlan.world.preset.
+ * Selects a theme preset skin for grid structure scenes.
  * Unsupported / future presets fall back to GenericGridWorld.
  */
 export function WorldRenderer({ visualPlan, ...rest }: WorldRendererProps) {
-  const preset = visualPlan.world.preset;
+  const preset = getTheme(visualPlan).preset;
 
   switch (preset) {
     case "farm":

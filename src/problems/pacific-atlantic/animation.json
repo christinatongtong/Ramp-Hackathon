@@ -1,8 +1,12 @@
 {
-  "world": {
+  "structure": {
+    "type": "grid",
+    "inputKey": "heights",
+    "layout": "top_down"
+  },
+  "theme": {
     "preset": "island",
-    "theme": "Derpy reverse multi-source ocean reachability across a labeled elevation grid",
-    "sceneType": "grid",
+    "name": "Derpy reverse multi-source ocean reachability across a labeled elevation grid",
     "palette": {
       "sky": "#BDEBFF",
       "ground": "#D9C88F",

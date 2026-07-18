@@ -3,9 +3,10 @@
 import { BaseGridWorld } from "./BaseGridWorld";
 import type { GridWorldProps } from "./types";
 import type { VisualPlan } from "@/lib/api/types";
+import { getTheme } from "@/lib/api/types";
 
 function GenericEnvironment({ visualPlan }: { visualPlan: VisualPlan }) {
-  const ground = visualPlan.world.palette.ground || "#94a3b8";
+  const ground = getTheme(visualPlan).palette.ground || "#94a3b8";
   return (
     <>
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow position={[0, -0.02, 0]}>

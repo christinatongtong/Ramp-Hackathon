@@ -1,8 +1,12 @@
 {
-  "world": {
+  "structure": {
+    "type": "grid",
+    "inputKey": "grid",
+    "layout": "isometric"
+  },
+  "theme": {
     "preset": "farm",
-    "theme": "derpy-orange-grove",
-    "sceneType": "grid",
+    "name": "derpy-orange-grove",
     "palette": {
       "sky": "#87CEEB",
       "ground": "#6FCF4A",
@@ -127,7 +131,7 @@
     {
       "action": "show_title",
       "durationMs": 700,
-      "text": "Rotting Oranges \u2014 Multi-Source BFS"
+      "text": "Rotting Oranges — Multi-Source BFS"
     },
     {
       "action": "show_grid",

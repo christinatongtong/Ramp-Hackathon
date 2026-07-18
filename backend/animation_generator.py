@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from openai import OpenAI
 
-from backend.schemas import GeneratedVisualPlan, ParsedVisualPlan
+from backend.schemas import GeneratedVisualPlan, ParsedVisualPlan, coerce_structure
 from backend.settings import get_settings
 
 
@@ -27,7 +27,8 @@ def generate_visual_plan(messages: list[dict]) -> GeneratedVisualPlan:
     parsed = response.output_parsed
 
     return GeneratedVisualPlan(
-        world=parsed.world,
+        structure=coerce_structure(parsed.structure),
+        theme=parsed.theme,
         entities={
             binding.semanticKey: binding.entity for binding in parsed.entities
         },

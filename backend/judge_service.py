@@ -114,7 +114,7 @@ def _validate_source_ast(code: str) -> str | None:
 WORKER_SOURCE = r'''
 import json
 import sys
-import traceback
+from collections import deque
 from copy import deepcopy
 
 payload = json.load(sys.stdin)
@@ -122,8 +122,145 @@ code = payload["code"]
 class_name = payload["className"]
 method_name = payload["methodName"]
 tests = payload["tests"]
+arguments = payload.get("arguments") or []
+argument_codecs = payload.get("argumentCodecs") or {}
+return_codec = payload.get("returnCodec")
 
-namespace = {"__name__": "__user__"}
+
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+class LinkedListCodec:
+    def decode(self, values):
+        if values is None:
+            return None
+        if not isinstance(values, list):
+            raise TypeError("linked_list decode expects a JSON array or null")
+        dummy = ListNode()
+        current = dummy
+        for value in values:
+            current.next = ListNode(value)
+            current = current.next
+        return dummy.next
+
+    def encode(self, head):
+        if head is None:
+            return []
+        values = []
+        seen = set()
+        while head is not None:
+            node_id = id(head)
+            if node_id in seen:
+                raise ValueError("Cycle detected while serializing linked list")
+            seen.add(node_id)
+            values.append(getattr(head, "val", head))
+            head = getattr(head, "next", None)
+        return values
+
+    def normalize(self, value):
+        if value is None:
+            return []
+        if isinstance(value, list):
+            return list(value)
+        return self.encode(value)
+
+
+class BinaryTreeCodec:
+    def decode(self, values):
+        if values is None:
+            return None
+        if not isinstance(values, list) or not values or values[0] is None:
+            return None
+        root = TreeNode(values[0])
+        queue = deque([root])
+        index = 1
+        while queue and index < len(values):
+            node = queue.popleft()
+            if index < len(values) and values[index] is not None:
+                node.left = TreeNode(values[index])
+                queue.append(node.left)
+            index += 1
+            if index < len(values) and values[index] is not None:
+                node.right = TreeNode(values[index])
+                queue.append(node.right)
+            index += 1
+        return root
+
+    def encode(self, root):
+        if root is None:
+            return None
+        values = []
+        queue = deque([root])
+        while queue:
+            node = queue.popleft()
+            if node is None:
+                values.append(None)
+                continue
+            values.append(getattr(node, "val", None))
+            queue.append(getattr(node, "left", None))
+            queue.append(getattr(node, "right", None))
+        while values and values[-1] is None:
+            values.pop()
+        return values
+
+    def normalize(self, value):
+        if value is None:
+            return None
+        if isinstance(value, list):
+            return list(value)
+        return self.encode(value)
+
+
+class GraphCodec:
+    def decode(self, value):
+        return self.normalize(value)
+
+    def encode(self, value):
+        return self.normalize(value)
+
+    def normalize(self, value):
+        if value is None:
+            return []
+        if not isinstance(value, list):
+            raise TypeError("graph codec expects an adjacency list")
+        return [list(row) for row in value]
+
+
+CODECS = {
+    "linked_list": LinkedListCodec(),
+    "binary_tree": BinaryTreeCodec(),
+    "graph": GraphCodec(),
+}
+
+
+def apply_codec(name, value, direction):
+    if not name:
+        return value
+    codec = CODECS.get(name)
+    if codec is None:
+        raise ValueError(f"Unknown codec '{name}'")
+    if direction == "decode":
+        return codec.decode(value)
+    if direction == "encode":
+        return codec.encode(value)
+    return codec.normalize(value)
+
+
+namespace = {
+    "__name__": "__user__",
+    "ListNode": ListNode,
+    "TreeNode": TreeNode,
+}
 try:
     compiled = compile(code, "<submission>", "exec")
     exec(compiled, namespace, namespace)
@@ -181,11 +318,50 @@ if not callable(method):
     }))
     raise SystemExit(0)
 
+
+def decode_input(raw_input):
+    if isinstance(raw_input, dict) and arguments:
+        kwargs = {}
+        for name in arguments:
+            if name not in raw_input:
+                raise KeyError(f"Missing argument '{name}' in test input")
+            value = deepcopy(raw_input[name])
+            kwargs[name] = apply_codec(argument_codecs.get(name), value, "decode")
+        return ("kwargs", kwargs)
+    if isinstance(raw_input, list) and len(arguments) > 1 and len(raw_input) == len(arguments):
+        args = []
+        for name, item in zip(arguments, raw_input):
+            args.append(apply_codec(argument_codecs.get(name), deepcopy(item), "decode"))
+        return ("args", args)
+    value = deepcopy(raw_input)
+    if arguments and len(arguments) == 1:
+        value = apply_codec(argument_codecs.get(arguments[0]), value, "decode")
+    return ("single", value)
+
+
+def invoke(method, raw_input):
+    kind, payload_value = decode_input(raw_input)
+    if kind == "kwargs":
+        return method(**payload_value)
+    if kind == "args":
+        return method(*payload_value)
+    return method(payload_value)
+
+
+def normalize_result(actual, expected):
+    encoded = apply_codec(return_codec, actual, "encode") if return_codec else actual
+    expected_norm = (
+        apply_codec(return_codec, expected, "normalize") if return_codec else expected
+    )
+    return encoded, expected_norm
+
+
 passed_count = 0
 for index, test in enumerate(tests):
     expected = test["expected"]
     try:
-        actual = method(deepcopy(test["input"]))
+        actual = invoke(method, test["input"])
+        actual_norm, expected_norm = normalize_result(actual, expected)
     except Exception as error:
         print(json.dumps({
             "passed": False,
@@ -196,11 +372,11 @@ for index, test in enumerate(tests):
         }))
         raise SystemExit(0)
 
-    if actual != expected:
+    if actual_norm != expected_norm:
         print(json.dumps({
             "passed": False,
             "verdict": "wrong_answer",
-            "message": f"Expected {expected!r}, received {actual!r}",
+            "message": f"Expected {expected_norm!r}, received {actual_norm!r}",
             "testsPassed": passed_count,
             "testsTotal": len(tests),
         }))
@@ -254,6 +430,9 @@ def judge_user_code(
         "code": code,
         "className": entrypoint.className,
         "methodName": entrypoint.methodName,
+        "arguments": list(entrypoint.arguments),
+        "argumentCodecs": dict(entrypoint.argumentCodecs),
+        "returnCodec": entrypoint.returnCodec,
         "tests": [
             {"input": test.input, "expected": test.expected} for test in tests
         ],

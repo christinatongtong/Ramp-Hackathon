@@ -1,0 +1,48 @@
+{
+  "sceneType": "array",
+  "inputKey": "numbers",
+  "bindings": [
+    {
+      "value": "2",
+      "semanticKey": "numeric_value_2",
+      "label": "2",
+      "entityType": "array_block"
+    },
+    {
+      "value": "7",
+      "semanticKey": "numeric_value_7",
+      "label": "7",
+      "entityType": "array_block"
+    },
+    {
+      "value": "9",
+      "semanticKey": "numeric_value_9",
+      "label": "9",
+      "entityType": "array_block"
+    },
+    {
+      "value": "11",
+      "semanticKey": "numeric_value_11",
+      "label": "11",
+      "entityType": "array_block"
+    },
+    {
+      "value": "13",
+      "semanticKey": "numeric_value_13",
+      "label": "13",
+      "entityType": "array_block"
+    },
+    {
+      "value": "15",
+      "semanticKey": "numeric_value_15",
+      "label": "15",
+      "entityType": "array_block"
+    },
+    {
+      "value": "17",
+      "semanticKey": "numeric_value_17",
+      "label": "17",
+      "entityType": "array_block"
+    }
+  ]
+}

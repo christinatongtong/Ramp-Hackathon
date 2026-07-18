@@ -1,0 +1,36 @@
+{
+  "sceneType": "linked_list",
+  "inputKey": "head",
+  "bindings": [
+    {
+      "value": "1",
+      "semanticKey": "node_value_1",
+      "label": "1",
+      "entityType": "list_node"
+    },
+    {
+      "value": "2",
+      "semanticKey": "node_value_2",
+      "label": "2",
+      "entityType": "list_node"
+    },
+    {
+      "value": "3",
+      "semanticKey": "node_value_3",
+      "label": "3",
+      "entityType": "list_node"
+    },
+    {
+      "value": "4",
+      "semanticKey": "node_value_4",
+      "label": "4",
+      "entityType": "list_node"
+    },
+    {
+      "value": "5",
+      "semanticKey": "node_value_5",
+      "label": "5",
+      "entityType": "list_node"
+    }
+  ]
+}

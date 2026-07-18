@@ -22,7 +22,18 @@ export type EffectHandler = {
     | "path_reveal"
     | "result_reveal"
     | "confetti"
-    | "failure_deflate";
+    | "failure_deflate"
+    | "compare_flash"
+    | "swap_arc"
+    | "pointer_hop"
+    | "window_slide"
+    | "value_flip"
+    | "edge_break"
+    | "edge_connect"
+    | "list_complete"
+    | "child_swap_flash"
+    | "subtree_glow"
+    | "cycle_pulse";
 };
 
 const REGISTRY: Record<string, EffectHandler> = {
@@ -41,6 +52,17 @@ const REGISTRY: Record<string, EffectHandler> = {
     label: "Not quite…",
     overlay: "failure_deflate",
   },
+  compare_flash: { pulse: true, label: "Compare", overlay: "cell_pulse" },
+  swap_arc: { pulse: true, label: "Swap", overlay: "bounce" },
+  pointer_hop: { pulse: true, label: "Pointer", overlay: "cell_pulse" },
+  window_slide: { pulse: false, label: "Window", overlay: "frontier_wave" },
+  value_flip: { pulse: true, label: "Write", overlay: "bounce" },
+  edge_break: { pulse: true, label: "Break link", overlay: "bounce" },
+  edge_connect: { pulse: true, label: "Reconnect", overlay: "path_reveal" },
+  list_complete: { pulse: false, label: "Reversed!", overlay: "confetti" },
+  child_swap_flash: { pulse: true, label: "Swap children", overlay: "bounce" },
+  subtree_glow: { pulse: true, label: "Subtree done", overlay: "result_reveal" },
+  cycle_pulse: { pulse: true, label: "Cycle!", overlay: "failure_deflate" },
 };
 
 export function resolveEffect(name: string | null | undefined): EffectHandler {

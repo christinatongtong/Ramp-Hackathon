@@ -1,0 +1,30 @@
+{
+  "sceneType": "graph",
+  "inputKey": "prerequisites",
+  "bindings": [
+    {
+      "value": "0",
+      "semanticKey": "course_label_0",
+      "label": "Course 0",
+      "entityType": "graph_node"
+    },
+    {
+      "value": "1",
+      "semanticKey": "course_label_1",
+      "label": "Course 1",
+      "entityType": "graph_node"
+    },
+    {
+      "value": "c0",
+      "semanticKey": "course_node_c0",
+      "label": "Node c0",
+      "entityType": "graph_node"
+    },
+    {
+      "value": "c1",
+      "semanticKey": "course_node_c1",
+      "label": "Node c1",
+      "entityType": "graph_node"
+    }
+  ]
+}

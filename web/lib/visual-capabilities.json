@@ -1,4 +1,12 @@
 {
+  "sceneTypes": ["grid", "array", "linked_list", "binary_tree", "graph"],
+  "layouts": {
+    "grid": ["top_down", "isometric"],
+    "array": ["horizontal", "bars", "window"],
+    "linked_list": ["horizontal_train"],
+    "binary_tree": ["layered"],
+    "graph": ["circle"]
+  },
   "presets": ["farm", "island", "generic_grid"],
   "entityPrimitives": [
     "empty_tile",
@@ -9,7 +17,12 @@
     "water",
     "wall",
     "destination",
-    "height_block"
+    "height_block",
+    "array_block",
+    "array_bar",
+    "list_node",
+    "tree_node",
+    "graph_node"
   ],
   "propPrimitives": [
     "tree",
@@ -17,6 +30,17 @@
     "goofy_cloud",
     "fence",
     "sign"
+  ],
+  "markerPrimitives": [
+    "index_pointer",
+    "range_bracket",
+    "window_highlight",
+    "named_pointer"
+  ],
+  "connectionPrimitives": [
+    "next_pointer",
+    "tree_edge",
+    "graph_edge"
   ],
   "effects": [
     "none",
@@ -29,7 +53,18 @@
     "path_reveal",
     "result_reveal",
     "confetti",
-    "failure_deflate"
+    "failure_deflate",
+    "compare_flash",
+    "swap_arc",
+    "pointer_hop",
+    "window_slide",
+    "value_flip",
+    "edge_break",
+    "edge_connect",
+    "list_complete",
+    "child_swap_flash",
+    "subtree_glow",
+    "cycle_pulse"
   ],
   "gridEvents": [
     "init",
@@ -42,5 +77,71 @@
     "path_mark",
     "level_start",
     "done"
-  ]
+  ],
+  "arrayEvents": [
+    "init",
+    "compare",
+    "swap",
+    "write",
+    "pointer_move",
+    "window_expand",
+    "window_shrink",
+    "range_highlight",
+    "element_finalize",
+    "done"
+  ],
+  "eventsByStructure": {
+    "grid": [
+      "init",
+      "visit",
+      "frontier_add",
+      "frontier_remove",
+      "cell_update",
+      "region_discovered",
+      "reachability_update",
+      "path_mark",
+      "level_start",
+      "done"
+    ],
+    "array": [
+      "init",
+      "compare",
+      "swap",
+      "write",
+      "pointer_move",
+      "window_expand",
+      "window_shrink",
+      "range_highlight",
+      "element_finalize",
+      "done"
+    ],
+    "linked_list": [
+      "init",
+      "pointer_set",
+      "pointer_move",
+      "link_update",
+      "node_visit",
+      "node_finalize",
+      "done"
+    ],
+    "binary_tree": [
+      "init",
+      "node_visit",
+      "child_swap",
+      "move_left",
+      "move_right",
+      "subtree_complete",
+      "done"
+    ],
+    "graph": [
+      "init",
+      "node_visit",
+      "edge_examine",
+      "node_enqueue",
+      "indegree_update",
+      "node_finalize",
+      "cycle_detected",
+      "done"
+    ]
+  }
 }

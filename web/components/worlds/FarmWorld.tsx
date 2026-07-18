@@ -4,6 +4,7 @@ import { Cloud } from "@react-three/drei";
 import { BaseGridWorld } from "./BaseGridWorld";
 import type { GridWorldProps } from "./types";
 import type { VisualPlan } from "@/lib/api/types";
+import { getTheme } from "@/lib/api/types";
 
 function Tree({
   position,
@@ -92,7 +93,8 @@ function FarmEnvironment({
   visualPlan: VisualPlan;
   nightFactor: number;
 }) {
-  const palette = visualPlan.world.palette;
+  const theme = getTheme(visualPlan);
+  const palette = theme.palette;
   const grassColor =
     nightFactor > 0.5
       ? "#3a5a2e"
@@ -103,20 +105,20 @@ function FarmEnvironment({
     nightFactor > 0.5 ? "#354f2f" : nightFactor > 0.2 ? "#6a9e52" : "#8bc34a";
 
   const treeCount =
-    visualPlan.world.props.find(
+    theme.props.find(
       (prop) =>
         prop.primitive === "tree" &&
         (prop.placement === "perimeter" || prop.placement === "scatter"),
     )?.count ?? 8;
 
   const cloudCount =
-    visualPlan.world.props.find(
+    theme.props.find(
       (prop) =>
         (prop.primitive === "goofy_cloud" || prop.primitive === "cloud") &&
         prop.placement === "sky",
     )?.count ?? 2;
 
-  const showFence = visualPlan.world.props.some(
+  const showFence = theme.props.some(
     (prop) => prop.primitive === "fence",
   );
 

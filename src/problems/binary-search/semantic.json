@@ -1,0 +1,42 @@
+{
+  "sceneType": "array",
+  "inputKey": "nums",
+  "bindings": [
+    {
+      "value": "-1",
+      "semanticKey": "number_neg_1",
+      "label": "-1",
+      "entityType": "array_block"
+    },
+    {
+      "value": "0",
+      "semanticKey": "number_0",
+      "label": "0",
+      "entityType": "array_block"
+    },
+    {
+      "value": "12",
+      "semanticKey": "number_12",
+      "label": "12",
+      "entityType": "array_block"
+    },
+    {
+      "value": "3",
+      "semanticKey": "number_3",
+      "label": "3",
+      "entityType": "array_block"
+    },
+    {
+      "value": "5",
+      "semanticKey": "number_5",
+      "label": "5",
+      "entityType": "array_block"
+    },
+    {
+      "value": "9",
+      "semanticKey": "number_9",
+      "label": "9",
+      "entityType": "array_block"
+    }
+  ]
+}

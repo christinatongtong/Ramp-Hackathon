@@ -19,7 +19,7 @@ def solve(grid: list[list[int]]) -> dict[str, Any]:
     def emit(event_type: str, **payload: Any) -> None:
         events.append({"type": event_type, **payload})
 
-    emit("init", grid=deepcopy(grid))
+    emit("init", structure="grid", grid=deepcopy(grid))
 
     if grid[0][0] != 0 or grid[n - 1][n - 1] != 0:
         emit("done", result=-1)

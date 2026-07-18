@@ -5,6 +5,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
+from backend.initial_state import build_initial_state
 from backend.schemas import (
     EntrypointSpec,
     JudgeTest,
@@ -175,11 +176,19 @@ def get_entrypoint(config: dict[str, Any]) -> EntrypointSpec:
     raw = config.get("entrypoint")
     if isinstance(raw, dict):
         method_name = raw.get("methodName") or raw.get("method") or "solve"
+        argument_codecs = raw.get("argumentCodecs") or {}
+        if not isinstance(argument_codecs, dict):
+            argument_codecs = {}
+        return_codec = raw.get("returnCodec")
         return EntrypointSpec(
             language=str(raw.get("language", "python")),
             className=str(raw.get("className", "Solution")),
             methodName=str(method_name),
             arguments=[str(arg) for arg in raw.get("arguments", [])],
+            argumentCodecs={
+                str(key): str(value) for key, value in argument_codecs.items()
+            },
+            returnCodec=str(return_codec) if return_codec else None,
         )
     return EntrypointSpec(
         language="python",
@@ -241,11 +250,7 @@ def get_initial_state(
         return {}
 
     initial_input = deepcopy(example.get("input"))
-    if isinstance(initial_input, list):
-        return {"grid": initial_input}
-    if isinstance(initial_input, dict):
-        return dict(initial_input)
-    return {"input": initial_input}
+    return build_initial_state(initial_input, config)
 
 
 def get_problem_facts(problem_id: str) -> ProblemFacts:

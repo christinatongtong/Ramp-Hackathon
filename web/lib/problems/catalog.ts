@@ -20,8 +20,13 @@ const HUB_LAYOUT: Array<{
   { position: [-4, 0, -2], color: "#38bdf8", themeFallback: "Island seas" },
   { position: [4, 0, -2], color: "#22d3ee", themeFallback: "Coastal heights" },
   { position: [0, 0, 1.5], color: "#a78bfa", themeFallback: "Binary maze" },
-  { position: [-3, 0, 2], color: "#f472b6", themeFallback: "Mystery world" },
-  { position: [3, 0, 2], color: "#facc15", themeFallback: "Mystery world" },
+  { position: [-3.5, 0, 2.2], color: "#f472b6", themeFallback: "Search lane" },
+  { position: [3.5, 0, 2.2], color: "#facc15", themeFallback: "Two pointers" },
+  { position: [-2, 0, 4.5], color: "#34d399", themeFallback: "Rewire rails" },
+  { position: [2, 0, 4.5], color: "#fb7185", themeFallback: "Tree canopy" },
+  { position: [-5, 0, 0.5], color: "#60a5fa", themeFallback: "Course graph" },
+  { position: [5, 0, 0.5], color: "#c084fc", themeFallback: "Mystery world" },
+  { position: [0, 0, 6.5], color: "#2dd4bf", themeFallback: "Mystery world" },
 ];
 
 /** Map backend problem summaries into hub portal entries. */

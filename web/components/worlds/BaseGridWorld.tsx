@@ -10,6 +10,7 @@ import { GridEntityLayer } from "@/components/entities/GridEntityLayer";
 import { EffectLayer } from "@/components/effects/EffectLayer";
 import { ResultChoreography } from "@/components/effects/ResultChoreography";
 import { CameraController } from "@/components/camera/CameraController";
+import { getTheme } from "@/lib/api/types";
 import type { GridWorldProps } from "./types";
 
 type BaseGridWorldProps = GridWorldProps & {
@@ -58,10 +59,11 @@ function SceneContent({
   } = props;
 
   const boardOpenAmount = useRef(0);
-  const timeMode = visualPlan.world.timeSystem?.mode ?? "static";
+  const theme = getTheme(visualPlan);
+  const timeMode = theme.timeSystem?.mode ?? "static";
   const label = statusLabel ?? (timeMode === "day_night" ? dayLabel(dayIndex) : null);
-  const cameraTarget = visualPlan.world.camera.target;
-  const cam = visualPlan.world.camera.position;
+  const cameraTarget = theme.camera.target;
+  const cam = theme.camera.position;
   const homePosition: [number, number, number] = Array.isArray(cam)
     ? [cam[0] ?? 3.5, cam[1] ?? 8, cam[2] ?? 14]
     : [3.5, 8, 14];
@@ -77,7 +79,7 @@ function SceneContent({
       {timeMode === "day_night" ? (
         <DayNightSky dayIndex={dayIndex} />
       ) : (
-        <StaticSky color={visualPlan.world.palette.sky || "#7ecbff"} />
+        <StaticSky color={theme.palette.sky || "#7ecbff"} />
       )}
 
       <directionalLight
@@ -89,7 +91,7 @@ function SceneContent({
       <pointLight
         intensity={0.3 - nightFactor * 0.15}
         position={[-5, 4, 3]}
-        color={visualPlan.world.palette.accent}
+        color={theme.palette.accent}
       />
 
       {environment}
@@ -100,7 +102,7 @@ function SceneContent({
         semanticSpec={semanticSpec}
         pulse={pulse}
         activeCell={activeCell}
-        title={visualPlan.world.theme}
+        title={theme.name}
         regionCells={regionCells}
         frontierCells={frontierCells}
       />
@@ -189,7 +191,7 @@ function SceneContent({
 }
 
 export function BaseGridWorld(props: BaseGridWorldProps) {
-  const cam = props.visualPlan.world.camera.position;
+  const cam = getTheme(props.visualPlan).camera.position;
   const cameraPosition = useMemo(
     (): [number, number, number] =>
       Array.isArray(cam)

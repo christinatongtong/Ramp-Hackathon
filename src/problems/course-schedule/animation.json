@@ -1,0 +1,158 @@
+{
+  "structure": {
+    "type": "graph",
+    "inputKey": "prerequisites",
+    "layout": "circle"
+  },
+  "theme": {
+    "preset": "generic_grid",
+    "name": "derpy-topological-course-map",
+    "palette": {
+      "sky": "#BFE8FF",
+      "ground": "#E8E2D3",
+      "accent": "#FFD166"
+    },
+    "camera": {
+      "mode": "top_down",
+      "position": [
+        0.0,
+        10.0,
+        0.0
+      ],
+      "target": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "props": [
+      {
+        "primitive": "goofy_cloud",
+        "placement": "sky",
+        "count": 2
+      },
+      {
+        "primitive": "sign",
+        "placement": "back",
+        "count": 1
+      }
+    ],
+    "timeSystem": {
+      "mode": "static",
+      "advanceOn": "none"
+    }
+  },
+  "entities": {
+    "course_label_0": {
+      "primitive": "graph_node",
+      "variant": "course-label",
+      "color": "#68B0AB",
+      "label": "0",
+      "idleAnimation": "gentle_bounce",
+      "expression": "cheerful"
+    },
+    "course_label_1": {
+      "primitive": "graph_node",
+      "variant": "course-label",
+      "color": "#68B0AB",
+      "label": "1",
+      "idleAnimation": "gentle_bounce",
+      "expression": "cheerful"
+    },
+    "course_node_c0": {
+      "primitive": "graph_node",
+      "variant": "course-node",
+      "color": "#4D96FF",
+      "label": "c0",
+      "idleAnimation": "gentle_float",
+      "expression": "curious"
+    },
+    "course_node_c1": {
+      "primitive": "graph_node",
+      "variant": "course-node",
+      "color": "#4D96FF",
+      "label": "c1",
+      "idleAnimation": "gentle_float",
+      "expression": "curious"
+    }
+  },
+  "eventBindings": {
+    "init": {
+      "effect": "none",
+      "durationMs": 400,
+      "color": null,
+      "explanation": "Show the course nodes, directed prerequisite edges, and initial indegrees.",
+      "targetReaction": "brief_focus",
+      "camera": "none"
+    },
+    "node_enqueue": {
+      "effect": "queue_glow",
+      "durationMs": 500,
+      "color": "#4D96FF",
+      "explanation": "Highlight a zero-indegree course as ready to process.",
+      "targetReaction": "brief_focus",
+      "camera": "none"
+    },
+    "node_finalize": {
+      "effect": "bounce",
+      "durationMs": 500,
+      "color": "#06D6A0",
+      "explanation": "Mark the dequeued course as completed in the topological ordering.",
+      "targetReaction": "brief_focus",
+      "camera": "none"
+    },
+    "edge_examine": {
+      "effect": "compare_flash",
+      "durationMs": 450,
+      "color": "#FFD166",
+      "explanation": "Emphasize the prerequisite edge currently being examined.",
+      "targetReaction": "brief_focus",
+      "camera": "none"
+    },
+    "indegree_update": {
+      "effect": "value_flip",
+      "durationMs": 550,
+      "color": "#F78C6B",
+      "explanation": "Reveal the traced indegree change on the affected course.",
+      "targetReaction": "brief_focus",
+      "camera": "brief_focus"
+    },
+    "done": {
+      "effect": "result_reveal",
+      "durationMs": 800,
+      "color": "#FFD166",
+      "explanation": "Reveal whether every course can be completed.",
+      "targetReaction": "brief_focus",
+      "camera": "brief_focus"
+    }
+  },
+  "resultChoreography": {
+    "success": {
+      "effect": "confetti",
+      "entityReaction": "bad_dance",
+      "explanation": "Celebrate when every course is finalized and the schedule is feasible."
+    },
+    "failure": {
+      "effect": "cycle_pulse",
+      "entityReaction": "confused_stare",
+      "explanation": "Emphasize the unresolved courses when a prerequisite cycle prevents completion."
+    }
+  },
+  "intro": [
+    {
+      "action": "show_title",
+      "durationMs": 900,
+      "text": "Course Schedule: Kahn's Topological Sort"
+    },
+    {
+      "action": "show_structure",
+      "durationMs": 1000,
+      "text": "Arrows point from each prerequisite to the course it unlocks."
+    },
+    {
+      "action": "highlight_sources",
+      "durationMs": 900,
+      "text": "Courses with indegree zero begin ready for processing."
+    }
+  ]
+}

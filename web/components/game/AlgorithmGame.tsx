@@ -10,6 +10,7 @@ import type {
   Grid,
   RunResponse,
 } from "@/lib/api/types";
+import { getStructure, getTheme } from "@/lib/api/types";
 import { resolveEffect } from "@/lib/effects/registry";
 import {
   compileIntroTimeline,
@@ -19,7 +20,13 @@ import {
 import { ProblemPanel } from "@/components/game/ProblemPanel";
 import { PythonEditor } from "@/components/game/PythonEditor";
 import { RunResultOverlay } from "@/components/game/RunResultOverlay";
-import { WorldRenderer } from "@/components/worlds/WorldRenderer";
+import { SceneRenderer } from "@/components/scenes/SceneRenderer";
+import type { ListNodeState } from "@/components/scenes/linked-list/types";
+import type { TreeNodeState } from "@/components/scenes/tree/types";
+import type {
+  GraphEdgeState,
+  GraphNodeState,
+} from "@/components/scenes/graph/types";
 
 const fredoka = Fredoka({ subsets: ["latin"], weight: ["600", "700"] });
 const animationEngine = new AnimationEngine();
@@ -47,12 +54,134 @@ function asCoordPairs(value: unknown): Array<[number, number]> | null {
   return pairs;
 }
 
+function pickNumberArray(state: Record<string, unknown>): number[] {
+  for (const key of ["values", "nums", "arr", "array"]) {
+    const value = state[key];
+    if (!Array.isArray(value)) continue;
+    if (value.length > 0 && Array.isArray(value[0])) continue;
+    return value.map((item) => Number(item));
+  }
+  return [];
+}
+
+function parseListNodes(raw: unknown): ListNodeState[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((item): item is Record<string, unknown> => !!item && typeof item === "object")
+    .filter((item) => typeof item.id === "string")
+    .map((item) => ({
+      id: String(item.id),
+      value: (item.value as number | string) ?? 0,
+      next: typeof item.next === "string" ? item.next : null,
+    }));
+}
+
+function parseTreeNodes(raw: unknown): TreeNodeState[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((item): item is Record<string, unknown> => !!item && typeof item === "object")
+    .filter((item) => typeof item.id === "string")
+    .map((item) => ({
+      id: String(item.id),
+      value: (item.value as number | string) ?? 0,
+      left: typeof item.left === "string" ? item.left : null,
+      right: typeof item.right === "string" ? item.right : null,
+    }));
+}
+
+function parseGraphNodes(raw: unknown): GraphNodeState[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((item): item is Record<string, unknown> => !!item && typeof item === "object")
+    .filter((item) => typeof item.id === "string")
+    .map((item) => ({
+      id: String(item.id),
+      label: (item.label as string | number) ?? item.id,
+      colorState:
+        typeof item.colorState === "string" ? item.colorState : "unvisited",
+    }));
+}
+
+function parseGraphEdges(raw: unknown): GraphEdgeState[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((item): item is Record<string, unknown> => !!item && typeof item === "object")
+    .filter(
+      (item) =>
+        typeof item.id === "string" &&
+        typeof item.from === "string" &&
+        typeof item.to === "string",
+    )
+    .map((item) => ({
+      id: String(item.id),
+      from: String(item.from),
+      to: String(item.to),
+      active: Boolean(item.active),
+    }));
+}
+
+function parseStringPointers(
+  raw: unknown,
+): Record<string, string | null> {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out: Record<string, string | null> = {};
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (typeof value === "string" || value === null) out[key] = value;
+  }
+  return out;
+}
+
+function parseIndegrees(raw: unknown): Record<string, number> {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out: Record<string, number> = {};
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (typeof value === "number") out[key] = value;
+  }
+  return out;
+}
+
 export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
   const { loading, error, problem, visualPlan, semanticSpec, initialState, submit } =
     useAnimationPackage(problemId);
 
   const [code, setCode] = useState("");
   const [grid, setGrid] = useState<Grid>(emptyGrid);
+  const [values, setValues] = useState<number[]>([]);
+  const [pointers, setPointers] = useState<Record<string, number>>({});
+  const [windowRange, setWindowRange] = useState<{
+    left: number;
+    right: number;
+  } | null>(null);
+  const [activeIndices, setActiveIndices] = useState<number[] | null>(null);
+  const [finalized, setFinalized] = useState<number[]>([]);
+  const [listNodes, setListNodes] = useState<ListNodeState[]>([]);
+  const [listHeadId, setListHeadId] = useState<string | null>(null);
+  const [listPointers, setListPointers] = useState<Record<string, string | null>>(
+    {},
+  );
+  const [listActiveNodeId, setListActiveNodeId] = useState<string | null>(null);
+  const [listFinalized, setListFinalized] = useState<string[]>([]);
+  const [listEdgeHighlight, setListEdgeHighlight] = useState<{
+    nodeId: string;
+    oldNext: string | null;
+    newNext: string | null;
+  } | null>(null);
+  const [listLayoutOrder, setListLayoutOrder] = useState<string[]>([]);
+  const [treeNodes, setTreeNodes] = useState<TreeNodeState[]>([]);
+  const [treeRootId, setTreeRootId] = useState<string | null>(null);
+  const [treeActiveNodeId, setTreeActiveNodeId] = useState<string | null>(null);
+  const [treeFinalized, setTreeFinalized] = useState<string[]>([]);
+  const [treeSwapHighlight, setTreeSwapHighlight] = useState<{
+    nodeId: string;
+  } | null>(null);
+  const [graphNodes, setGraphNodes] = useState<GraphNodeState[]>([]);
+  const [graphEdges, setGraphEdges] = useState<GraphEdgeState[]>([]);
+  const [graphActiveNodeId, setGraphActiveNodeId] = useState<string | null>(null);
+  const [graphActiveEdgeId, setGraphActiveEdgeId] = useState<string | null>(null);
+  const [graphFinalized, setGraphFinalized] = useState<string[]>([]);
+  const [graphIndegrees, setGraphIndegrees] = useState<Record<string, number>>(
+    {},
+  );
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [gameStatus, setGameStatus] = useState<GameStatus>("idle");
   const [runResult, setRunResult] = useState<RunResponse | null>(null);
@@ -94,20 +223,71 @@ export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
     }
   }, [problem]);
 
+  const applyStructureInitial = useCallback(
+    (state: Record<string, unknown>, structureType: string) => {
+      if (structureType === "array") {
+        setValues(pickNumberArray(state));
+        setPointers({});
+        setWindowRange(null);
+        setActiveIndices(null);
+        setFinalized([]);
+        return;
+      }
+      if (structureType === "linked_list") {
+        const nodes = parseListNodes(state.nodes);
+        const headId =
+          typeof state.headId === "string" || state.headId === null
+            ? (state.headId as string | null)
+            : null;
+        setListNodes(nodes);
+        setListHeadId(headId);
+        setListPointers({});
+        setListActiveNodeId(null);
+        setListFinalized([]);
+        setListEdgeHighlight(null);
+        setListLayoutOrder(nodes.map((n) => n.id));
+        return;
+      }
+      if (structureType === "binary_tree") {
+        const nodes = parseTreeNodes(state.nodes);
+        setTreeNodes(nodes);
+        setTreeRootId(
+          typeof state.rootId === "string" ? state.rootId : null,
+        );
+        setTreeActiveNodeId(null);
+        setTreeFinalized([]);
+        setTreeSwapHighlight(null);
+        return;
+      }
+      if (structureType === "graph") {
+        setGraphNodes(parseGraphNodes(state.nodes));
+        setGraphEdges(parseGraphEdges(state.edges));
+        setGraphIndegrees(parseIndegrees(state.indegrees));
+        setGraphActiveNodeId(null);
+        setGraphActiveEdgeId(null);
+        setGraphFinalized([]);
+        return;
+      }
+      const initial = readGridFromState(state);
+      if (initial) setGrid(initial);
+    },
+    [],
+  );
+
   useEffect(() => {
-    if (!initialState) return;
-    const initial = readGridFromState(initialState);
-    if (initial) setGrid(initial);
+    if (!initialState || !visualPlan) return;
+    const structure = getStructure(visualPlan);
+    applyStructureInitial(initialState, structure.type);
     setGameStatus("idle");
-  }, [initialState]);
+  }, [initialState, visualPlan, applyStructureInitial]);
 
   const playIntroActions = useCallback(async () => {
     if (!visualPlan || introPlayed.current) return;
     introPlayed.current = true;
     const intro = compileIntroTimeline(visualPlan);
     for (const step of intro) {
-      if (step.action === "show_title") {
-        setIntroTitle(step.text ?? visualPlan.world.theme);
+      if (step.action === "show_title" || step.action === "show_structure") {
+        setIntroTitle(step.text ?? getTheme(visualPlan).name);
       } else if (step.action === "show_grid") {
         setStatusLabel(step.text);
       } else if (step.action === "highlight_sources") {
@@ -158,15 +338,17 @@ export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
     setIsToggling(false);
   }, []);
 
-  const restoreInitialGrid = useCallback(() => {
-    const initial = initialState ? readGridFromState(initialState) : null;
-    setGrid(initial ?? emptyGrid());
-  }, [initialState]);
+  const restoreInitialState = useCallback(() => {
+    if (!initialState || !visualPlan) return;
+    const structure = getStructure(visualPlan);
+    applyStructureInitial(initialState, structure.type);
+  }, [initialState, visualPlan, applyStructureInitial]);
 
   const clearPlaybackState = () => {
     setDayIndex(null);
     setPulse(false);
     setActiveCell(null);
+    setActiveIndices(null);
     setStatusLabel(null);
     setEffect(null);
     setEffectColor(null);
@@ -176,11 +358,13 @@ export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
     setResultOverlay(false);
     setResultExplanation(null);
     setIntroTitle(null);
+    setListEdgeHighlight(null);
+    setTreeSwapHighlight(null);
   };
 
   const handleReset = () => {
     animationEngine.cancel();
-    restoreInitialGrid();
+    restoreInitialState();
     clearPlaybackState();
     setStatusMessage(null);
     setGameStatus("idle");
@@ -204,7 +388,7 @@ export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
     setRunResult(null);
     clearPlaybackState();
     setStatusMessage("Checking your solution…");
-    restoreInitialGrid();
+    restoreInitialState();
 
     try {
       const result = await submit({
@@ -233,6 +417,142 @@ export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
         onStep: (step, index) => {
           const stepGrid = readGridFromState(step.state);
           if (stepGrid) setGrid(stepGrid);
+
+          if (Array.isArray(step.state.values)) {
+            setValues(
+              (step.state.values as unknown[]).map((item) => Number(item)),
+            );
+          }
+          if (
+            step.state.pointers &&
+            typeof step.state.pointers === "object" &&
+            !Array.isArray(step.state.pointers)
+          ) {
+            const ptrs = step.state.pointers as Record<string, unknown>;
+            const numeric: Record<string, number> = {};
+            let hasNumeric = false;
+            for (const [key, value] of Object.entries(ptrs)) {
+              if (typeof value === "number") {
+                numeric[key] = value;
+                hasNumeric = true;
+              }
+            }
+            if (hasNumeric) setPointers(numeric);
+            else setListPointers(parseStringPointers(ptrs));
+          }
+          if (
+            step.state.window &&
+            typeof step.state.window === "object" &&
+            !Array.isArray(step.state.window)
+          ) {
+            const w = step.state.window as { left?: number; right?: number };
+            if (typeof w.left === "number" && typeof w.right === "number") {
+              setWindowRange({ left: w.left, right: w.right });
+            }
+          } else if (step.state.window === null) {
+            setWindowRange(null);
+          }
+          if (Array.isArray(step.state.activeIndices)) {
+            setActiveIndices(
+              step.state.activeIndices.filter(
+                (i): i is number => typeof i === "number",
+              ),
+            );
+          } else {
+            setActiveIndices(null);
+          }
+          if (Array.isArray(step.state.finalized)) {
+            const nums = step.state.finalized.filter(
+              (i): i is number => typeof i === "number",
+            );
+            const ids = step.state.finalized.filter(
+              (i): i is string => typeof i === "string",
+            );
+            if (nums.length) setFinalized(nums);
+            if (ids.length) {
+              setListFinalized(ids);
+              setTreeFinalized(ids);
+              setGraphFinalized(ids);
+            }
+          }
+
+          if (Array.isArray(step.state.nodes)) {
+            const structureType = step.state.structureType;
+            if (structureType === "linked_list") {
+              setListNodes(parseListNodes(step.state.nodes));
+            } else if (structureType === "binary_tree") {
+              setTreeNodes(parseTreeNodes(step.state.nodes));
+            } else if (structureType === "graph") {
+              setGraphNodes(parseGraphNodes(step.state.nodes));
+            }
+          }
+          if ("headId" in step.state) {
+            setListHeadId(
+              typeof step.state.headId === "string" || step.state.headId === null
+                ? (step.state.headId as string | null)
+                : null,
+            );
+          }
+          if ("rootId" in step.state) {
+            setTreeRootId(
+              typeof step.state.rootId === "string" ? step.state.rootId : null,
+            );
+          }
+          if (typeof step.state.activeNodeId === "string" || step.state.activeNodeId === null) {
+            const id = step.state.activeNodeId as string | null;
+            setListActiveNodeId(id);
+            setTreeActiveNodeId(id);
+            setGraphActiveNodeId(id);
+          }
+          if (Array.isArray(step.state.layoutOrder)) {
+            setListLayoutOrder(
+              step.state.layoutOrder.filter(
+                (id): id is string => typeof id === "string",
+              ),
+            );
+          }
+          if (
+            step.state.edgeHighlight &&
+            typeof step.state.edgeHighlight === "object"
+          ) {
+            const eh = step.state.edgeHighlight as Record<string, unknown>;
+            if (typeof eh.nodeId === "string") {
+              setListEdgeHighlight({
+                nodeId: eh.nodeId,
+                oldNext:
+                  typeof eh.oldNext === "string" || eh.oldNext === null
+                    ? (eh.oldNext as string | null)
+                    : null,
+                newNext:
+                  typeof eh.newNext === "string" || eh.newNext === null
+                    ? (eh.newNext as string | null)
+                    : null,
+              });
+            }
+          } else if (step.state.edgeHighlight === null) {
+            setListEdgeHighlight(null);
+          }
+          if (
+            step.state.swapHighlight &&
+            typeof step.state.swapHighlight === "object"
+          ) {
+            const sh = step.state.swapHighlight as { nodeId?: string };
+            if (typeof sh.nodeId === "string") {
+              setTreeSwapHighlight({ nodeId: sh.nodeId });
+            }
+          } else if (step.state.swapHighlight === null) {
+            setTreeSwapHighlight(null);
+          }
+          if (Array.isArray(step.state.edges)) {
+            setGraphEdges(parseGraphEdges(step.state.edges));
+          }
+          if (typeof step.state.activeEdgeId === "string" || step.state.activeEdgeId === null) {
+            setGraphActiveEdgeId(step.state.activeEdgeId as string | null);
+          }
+          if (step.state.indegrees && typeof step.state.indegrees === "object") {
+            setGraphIndegrees(parseIndegrees(step.state.indegrees));
+          }
+
           setDayIndex(step.day);
 
           const effectName =
@@ -314,10 +634,33 @@ export function AlgorithmGame({ problemId }: AlgorithmGameProps) {
   return (
     <div className={`farm-layout ${fredoka.className}`}>
       <div className="farm-layout__world">
-        <WorldRenderer
+        <SceneRenderer
           visualPlan={visualPlan}
           semanticSpec={semanticSpec}
           grid={grid.length ? grid : [["0"]]}
+          values={values}
+          pointers={pointers}
+          window={windowRange}
+          activeIndices={activeIndices}
+          finalized={finalized}
+          listNodes={listNodes}
+          listHeadId={listHeadId}
+          listPointers={listPointers}
+          listActiveNodeId={listActiveNodeId}
+          listFinalized={listFinalized}
+          listEdgeHighlight={listEdgeHighlight}
+          listLayoutOrder={listLayoutOrder}
+          treeNodes={treeNodes}
+          treeRootId={treeRootId}
+          treeActiveNodeId={treeActiveNodeId}
+          treeFinalized={treeFinalized}
+          treeSwapHighlight={treeSwapHighlight}
+          graphNodes={graphNodes}
+          graphEdges={graphEdges}
+          graphActiveNodeId={graphActiveNodeId}
+          graphActiveEdgeId={graphActiveEdgeId}
+          graphFinalized={graphFinalized}
+          graphIndegrees={graphIndegrees}
           pulse={pulse}
           activeCell={activeCell}
           dayIndex={dayIndex}

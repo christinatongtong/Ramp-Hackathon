@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
 from backend.capabilities import (
     supported_effects,
@@ -12,15 +12,20 @@ from backend.capabilities import (
 )
 
 
-SceneType = Literal["grid", "height_map"]
+SceneType = Literal["grid", "array", "linked_list", "binary_tree", "graph"]
 CameraMode = Literal["top_down", "isometric", "follow"]
 RunMode = Literal["canonical", "user"]
-# Keep in sync with visual-capabilities.json presets.
+# Keep in sync with visual-capabilities.json presets (theme skins).
 WorldPreset = Literal["farm", "island", "generic_grid"]
 PropPlacement = Literal["perimeter", "sky", "back", "front", "scatter"]
 TimeAdvanceOn = Literal["minute", "level", "event", "none"]
+GridLayout = Literal["top_down", "isometric"]
+ArrayLayout = Literal["horizontal", "bars", "window"]
+LinkedListLayout = Literal["horizontal_train"]
+BinaryTreeLayout = Literal["layered"]
+GraphLayout = Literal["circle"]
 
-# Keep in sync with visual-capabilities.json entityPrimitives + propPrimitives.
+# Keep in sync with visual-capabilities.json entityPrimitives + propPrimitives + markers.
 PrimitiveType = Literal[
     "empty_tile",
     "floor_tile",
@@ -31,11 +36,23 @@ PrimitiveType = Literal[
     "wall",
     "destination",
     "height_block",
+    "array_block",
+    "array_bar",
+    "list_node",
+    "tree_node",
+    "graph_node",
     "tree",
     "cloud",
     "sign",
     "fence",
     "goofy_cloud",
+    "index_pointer",
+    "range_bracket",
+    "window_highlight",
+    "named_pointer",
+    "next_pointer",
+    "tree_edge",
+    "graph_edge",
 ]
 
 IdleAnimation = Literal[
@@ -68,10 +85,22 @@ AnimationEffect = Literal[
     "result_reveal",
     "confetti",
     "failure_deflate",
+    "compare_flash",
+    "swap_arc",
+    "pointer_hop",
+    "window_slide",
+    "value_flip",
+    "edge_break",
+    "edge_connect",
+    "list_complete",
+    "child_swap_flash",
+    "subtree_glow",
+    "cycle_pulse",
 ]
 
 IntroActionType = Literal[
     "show_grid",
+    "show_structure",
     "camera_pan",
     "show_title",
     "highlight_sources",
@@ -155,6 +184,8 @@ class EntrypointSpec(BaseModel):
     className: str = "Solution"
     methodName: str = "solve"
     arguments: list[str] = Field(default_factory=list)
+    argumentCodecs: dict[str, str] = Field(default_factory=dict)
+    returnCodec: str | None = None
 
 
 class ProblemFacts(BaseModel):
@@ -236,9 +267,125 @@ class TimeSystemSpec(StrictModel):
     advanceOn: TimeAdvanceOn = "none"
 
 
-class WorldSpec(StrictModel):
+class GridStructureSpec(StrictModel):
+    type: Literal["grid"] = "grid"
+    inputKey: str = Field(default="grid", min_length=1, max_length=40)
+    layout: GridLayout = "isometric"
+
+
+class ArrayStructureSpec(StrictModel):
+    type: Literal["array"] = "array"
+    inputKey: str = Field(default="nums", min_length=1, max_length=40)
+    layout: ArrayLayout = "horizontal"
+    showIndices: bool = True
+
+
+class LinkedListStructureSpec(StrictModel):
+    type: Literal["linked_list"] = "linked_list"
+    inputKey: str = Field(default="head", min_length=1, max_length=40)
+    layout: LinkedListLayout = "horizontal_train"
+
+
+class BinaryTreeStructureSpec(StrictModel):
+    type: Literal["binary_tree"] = "binary_tree"
+    inputKey: str = Field(default="root", min_length=1, max_length=40)
+    layout: BinaryTreeLayout = "layered"
+
+
+class GraphStructureSpec(StrictModel):
+    type: Literal["graph"] = "graph"
+    inputKey: str = Field(default="numCourses", min_length=1, max_length=40)
+    layout: GraphLayout = "circle"
+
+
+StructureSpec = Annotated[
+    GridStructureSpec
+    | ArrayStructureSpec
+    | LinkedListStructureSpec
+    | BinaryTreeStructureSpec
+    | GraphStructureSpec,
+    Field(discriminator="type"),
+]
+
+
+class ParsedStructureSpec(StrictModel):
+    """Flat structure for OpenAI structured outputs (no oneOf/discriminator)."""
+
+    type: SceneType
+    inputKey: str = Field(default="grid", min_length=1, max_length=40)
+    layout: str = Field(default="isometric", min_length=1, max_length=40)
+    showIndices: bool = True
+
+
+def coerce_structure(
+    parsed: ParsedStructureSpec,
+) -> (
+    GridStructureSpec
+    | ArrayStructureSpec
+    | LinkedListStructureSpec
+    | BinaryTreeStructureSpec
+    | GraphStructureSpec
+):
+    if parsed.type == "array":
+        layout: ArrayLayout = (
+            parsed.layout  # type: ignore[assignment]
+            if parsed.layout in ("horizontal", "bars", "window")
+            else "horizontal"
+        )
+        return ArrayStructureSpec(
+            type="array",
+            inputKey=parsed.inputKey or "nums",
+            layout=layout,
+            showIndices=parsed.showIndices,
+        )
+    if parsed.type == "linked_list":
+        return LinkedListStructureSpec(
+            type="linked_list",
+            inputKey=parsed.inputKey or "head",
+            layout="horizontal_train",
+        )
+    if parsed.type == "binary_tree":
+        return BinaryTreeStructureSpec(
+            type="binary_tree",
+            inputKey=parsed.inputKey or "root",
+            layout="layered",
+        )
+    if parsed.type == "graph":
+        return GraphStructureSpec(
+            type="graph",
+            inputKey=parsed.inputKey or "numCourses",
+            layout="circle",
+        )
+    grid_layout: GridLayout = (
+        parsed.layout  # type: ignore[assignment]
+        if parsed.layout in ("top_down", "isometric")
+        else "isometric"
+    )
+    return GridStructureSpec(
+        type="grid",
+        inputKey=parsed.inputKey or "grid",
+        layout=grid_layout,
+    )
+
+
+class ThemeSpec(StrictModel):
+    """Artistic presentation — separate from data-structure topology."""
+
     preset: WorldPreset
-    theme: str = Field(min_length=1, max_length=80)
+    name: str = Field(min_length=1, max_length=120)
+    palette: PaletteSpec
+    camera: CameraConfig
+    props: list[WorldProp] = Field(default_factory=list, max_length=12)
+    timeSystem: TimeSystemSpec = Field(
+        default_factory=lambda: TimeSystemSpec(mode="static", advanceOn="none")
+    )
+
+
+class WorldSpec(StrictModel):
+    """Legacy combined world block — kept for migration of old animation.json."""
+
+    preset: WorldPreset
+    theme: str = Field(min_length=1, max_length=120)
     sceneType: SceneType = "grid"
     palette: PaletteSpec
     camera: CameraConfig
@@ -284,7 +431,7 @@ class IntroAction(StrictModel):
 
 
 class StateBinding(StrictModel):
-    """Maps an observed cell value to a semantic key + entity type."""
+    """Maps an observed cell/element value to a semantic key + entity type."""
 
     value: str = Field(min_length=1, max_length=40)
     semanticKey: str = Field(min_length=1, max_length=60)
@@ -293,7 +440,7 @@ class StateBinding(StrictModel):
 
 
 class ProblemSemanticSpec(StrictModel):
-    sceneType: Literal["grid"] = "grid"
+    sceneType: SceneType = "grid"
     inputKey: str = Field(default="grid", min_length=1, max_length=40)
     bindings: list[StateBinding] = Field(min_length=1, max_length=40)
 
@@ -315,7 +462,8 @@ class EventBinding(StrictModel):
 class ParsedVisualPlan(StrictModel):
     """Structured-output shape for OpenAI (lists, not open-ended dicts)."""
 
-    world: WorldSpec
+    structure: ParsedStructureSpec
+    theme: ThemeSpec
     entities: list[EntityBinding] = Field(min_length=1, max_length=20)
     eventBindings: list[EventBinding] = Field(min_length=1, max_length=40)
     resultChoreography: ResultChoreography
@@ -330,11 +478,26 @@ class ParsedProblemBundle(StrictModel):
 
 
 class GeneratedVisualPlan(BaseModel):
-    world: WorldSpec
+    structure: StructureSpec
+    theme: ThemeSpec
     entities: dict[str, EntityDefinition]
     eventBindings: dict[str, EventAnimation]
     resultChoreography: ResultChoreography
     intro: list[IntroAction]
+
+    @property
+    def world(self) -> WorldSpec:
+        """Compat view for code still reading plan.world."""
+
+        return WorldSpec(
+            preset=self.theme.preset,
+            theme=self.theme.name,
+            sceneType=self.structure.type,  # type: ignore[arg-type]
+            palette=self.theme.palette,
+            camera=self.theme.camera,
+            props=self.theme.props,
+            timeSystem=self.theme.timeSystem,
+        )
 
 
 class GeneratedProblemBundle(BaseModel):
@@ -344,8 +507,9 @@ class GeneratedProblemBundle(BaseModel):
 
 
 class ObservedTraceSchema(BaseModel):
-    cellValues: list[str]
-    eventTypes: list[str]
+    structureType: SceneType = "grid"
+    cellValues: list[str] = Field(default_factory=list)
+    eventTypes: list[str] = Field(default_factory=list)
 
 
 class PublicationRecord(BaseModel):
@@ -374,8 +538,18 @@ class ClientAnimationPackage(BaseModel):
     initialState: dict[str, Any]
 
 
-class BuildResponse(BaseModel):
+class BuildProblemRequest(BaseModel):
+    style: str = "derpy"
+    force: bool = False
+    exampleIndex: int | None = None
+
+
+class BuildProblemResponse(BaseModel):
     problemId: str
-    status: Literal["published", "draft", "generation_failed"]
-    errors: list[str] = Field(default_factory=list)
+    status: Literal["published", "validation_failed", "draft"]
     package: ClientAnimationPackage | None = None
+    errors: list[str] = Field(default_factory=list)
+
+
+# Backward-compatible alias used by older imports / CLI.
+BuildResponse = BuildProblemResponse

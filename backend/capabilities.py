@@ -19,6 +19,15 @@ def load_capabilities() -> dict[str, Any]:
     return payload
 
 
+def supported_scene_types() -> frozenset[str]:
+    return frozenset(str(item) for item in load_capabilities().get("sceneTypes", []))
+
+
+def supported_layouts(scene_type: str) -> frozenset[str]:
+    layouts = load_capabilities().get("layouts") or {}
+    return frozenset(str(item) for item in layouts.get(scene_type, []))
+
+
 def supported_presets() -> frozenset[str]:
     return frozenset(str(item) for item in load_capabilities().get("presets", []))
 
@@ -35,8 +44,25 @@ def supported_prop_primitives() -> frozenset[str]:
     )
 
 
+def supported_marker_primitives() -> frozenset[str]:
+    return frozenset(
+        str(item) for item in load_capabilities().get("markerPrimitives", [])
+    )
+
+
+def supported_connection_primitives() -> frozenset[str]:
+    return frozenset(
+        str(item) for item in load_capabilities().get("connectionPrimitives", [])
+    )
+
+
 def supported_primitives() -> frozenset[str]:
-    return supported_entity_primitives() | supported_prop_primitives()
+    return (
+        supported_entity_primitives()
+        | supported_prop_primitives()
+        | supported_marker_primitives()
+        | supported_connection_primitives()
+    )
 
 
 def supported_effects() -> frozenset[str]:
@@ -47,19 +73,90 @@ def supported_grid_events() -> frozenset[str]:
     return frozenset(str(item) for item in load_capabilities().get("gridEvents", []))
 
 
+def supported_array_events() -> frozenset[str]:
+    return frozenset(str(item) for item in load_capabilities().get("arrayEvents", []))
+
+
+def supported_events_for(structure_type: str) -> frozenset[str]:
+    caps = load_capabilities()
+    by_structure = caps.get("eventsByStructure") or {}
+    if isinstance(by_structure, dict) and structure_type in by_structure:
+        return frozenset(str(item) for item in by_structure[structure_type])
+    if structure_type == "array":
+        return supported_array_events()
+    if structure_type == "linked_list":
+        return frozenset(
+            {
+                "init",
+                "pointer_set",
+                "pointer_move",
+                "link_update",
+                "node_visit",
+                "node_finalize",
+                "done",
+            }
+        )
+    if structure_type == "binary_tree":
+        return frozenset(
+            {
+                "init",
+                "node_visit",
+                "child_swap",
+                "move_left",
+                "move_right",
+                "subtree_complete",
+                "done",
+            }
+        )
+    if structure_type == "graph":
+        return frozenset(
+            {
+                "init",
+                "node_visit",
+                "edge_examine",
+                "node_enqueue",
+                "indegree_update",
+                "node_finalize",
+                "cycle_detected",
+                "done",
+            }
+        )
+    return supported_grid_events()
+
+
+def _theme_from_plan(plan: dict[str, Any]) -> dict[str, Any] | None:
+    theme = plan.get("theme")
+    if isinstance(theme, dict):
+        return theme
+    world = plan.get("world")
+    if isinstance(world, dict):
+        return world
+    return None
+
+
 def plan_uses_supported_capabilities(plan: dict[str, Any]) -> list[str]:
     """Return capability violations for a raw visual-plan dict (empty = ok)."""
 
     errors: list[str] = []
-    world = plan.get("world")
-    if not isinstance(world, dict):
-        return ["Visual plan is missing world."]
+    theme = _theme_from_plan(plan)
+    if theme is None:
+        return ["Visual plan is missing theme/world."]
 
-    preset = world.get("preset")
+    structure = plan.get("structure")
+    if isinstance(structure, dict):
+        stype = structure.get("type")
+        if stype not in supported_scene_types():
+            errors.append(f"Unsupported structure type '{stype}'.")
+        layout = structure.get("layout")
+        if layout and stype in supported_scene_types():
+            if layout not in supported_layouts(str(stype)):
+                errors.append(f"Unsupported layout '{layout}' for '{stype}'.")
+
+    preset = theme.get("preset")
     if preset not in supported_presets():
-        errors.append(f"Unsupported world preset '{preset}'.")
+        errors.append(f"Unsupported theme preset '{preset}'.")
 
-    for prop in world.get("props") or []:
+    for prop in theme.get("props") or []:
         if not isinstance(prop, dict):
             continue
         primitive = prop.get("primitive")
@@ -68,13 +165,13 @@ def plan_uses_supported_capabilities(plan: dict[str, Any]) -> list[str]:
 
     entities = plan.get("entities") or {}
     if isinstance(entities, dict):
-        for cell_value, entity in entities.items():
+        for key, entity in entities.items():
             if not isinstance(entity, dict):
                 continue
             primitive = entity.get("primitive")
             if primitive not in supported_primitives():
                 errors.append(
-                    f"Unsupported primitive '{primitive}' for cell value '{cell_value}'."
+                    f"Unsupported primitive '{primitive}' for entity '{key}'."
                 )
 
     bindings = plan.get("eventBindings") or {}

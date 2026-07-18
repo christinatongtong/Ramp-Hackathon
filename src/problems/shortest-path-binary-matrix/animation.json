@@ -1,8 +1,12 @@
 {
-  "world": {
+  "structure": {
+    "type": "grid",
+    "inputKey": "grid",
+    "layout": "top_down"
+  },
+  "theme": {
     "preset": "generic_grid",
-    "theme": "derpy-binary-maze",
-    "sceneType": "grid",
+    "name": "derpy-binary-maze",
     "palette": {
       "sky": "#BFE9FF",
       "ground": "#D9E2E8",

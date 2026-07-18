@@ -1,0 +1,62 @@
+{
+  "id": "invert-binary-tree",
+  "number": 226,
+  "title": "Invert Binary Tree",
+  "difficulty": "Easy",
+  "category": "tree",
+  "algorithm": ["binary-tree", "DFS"],
+  "scene": {
+    "type": "binary_tree",
+    "inputKey": "root"
+  },
+  "examples": [
+    {
+      "name": "Full tree",
+      "input": { "root": [4, 2, 7, 1, 3, 6, 9] },
+      "expected": [4, 7, 2, 9, 6, 3, 1]
+    },
+    {
+      "name": "Three nodes",
+      "input": { "root": [2, 1, 3] },
+      "expected": [2, 3, 1]
+    },
+    {
+      "name": "Empty tree",
+      "input": { "root": [] },
+      "expected": []
+    }
+  ],
+  "tests": [
+    {
+      "input": { "root": [4, 2, 7, 1, 3, 6, 9] },
+      "expected": [4, 7, 2, 9, 6, 3, 1],
+      "hidden": false
+    },
+    {
+      "input": { "root": [2, 1, 3] },
+      "expected": [2, 3, 1],
+      "hidden": false
+    },
+    {
+      "input": { "root": [] },
+      "expected": [],
+      "hidden": false
+    },
+    {
+      "input": { "root": [1, 2, 3, null, 4] },
+      "expected": [1, 3, 2, null, null, 4],
+      "hidden": true
+    }
+  ],
+  "solutionFile": "solution.py",
+  "defaultExample": 0,
+  "entrypoint": {
+    "language": "python",
+    "className": "Solution",
+    "methodName": "invertTree",
+    "arguments": ["root"],
+    "argumentCodecs": { "root": "binary_tree" },
+    "returnCodec": "binary_tree"
+  },
+  "starterCode": "from typing import Optional\n\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\nclass Solution:\n    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:\n        # Write your solution here\n        pass\n"
+}

@@ -1,0 +1,48 @@
+{
+  "sceneType": "binary_tree",
+  "inputKey": "root",
+  "bindings": [
+    {
+      "value": "1",
+      "semanticKey": "node_value_1",
+      "label": "1",
+      "entityType": "tree_node"
+    },
+    {
+      "value": "2",
+      "semanticKey": "node_value_2",
+      "label": "2",
+      "entityType": "tree_node"
+    },
+    {
+      "value": "3",
+      "semanticKey": "node_value_3",
+      "label": "3",
+      "entityType": "tree_node"
+    },
+    {
+      "value": "4",
+      "semanticKey": "node_value_4",
+      "label": "4",
+      "entityType": "tree_node"
+    },
+    {
+      "value": "6",
+      "semanticKey": "node_value_6",
+      "label": "6",
+      "entityType": "tree_node"
+    },
+    {
+      "value": "7",
+      "semanticKey": "node_value_7",
+      "label": "7",
+      "entityType": "tree_node"
+    },
+    {
+      "value": "9",
+      "semanticKey": "node_value_9",
+      "label": "9",
+      "entityType": "tree_node"
+    }
+  ]
+}

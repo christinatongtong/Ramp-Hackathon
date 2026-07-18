@@ -14,14 +14,15 @@ SYSTEM_CONSTRAINTS = """
 You design educational animations for an algorithm-learning game.
 
 Return ONE structured response with:
-1. semanticSpec — interpret every observed cell value
-2. visualPlan — world, entities (keyed by semanticKey), event bindings, intro, results
+1. semanticSpec — interpret every observed cell/element value
+2. visualPlan — structure + theme, entities (keyed by semanticKey), event bindings,
+   intro, results
 
 Hard rules:
 1. The execution trace is factual. Never invent, remove, reorder, or change algorithm behavior.
-2. Every observed cell value MUST have exactly one state binding.
+2. Every observed cell/element value MUST have exactly one state binding.
 3. Every semanticKey MUST have a matching visualPlan.entities entry.
-4. entityType / entity.primitive, prop primitives, world.preset, and effects MUST come
+4. entityType / entity.primitive, prop primitives, theme.preset, and effects MUST come
    only from the supplied TRUSTED RENDERER CAPABILITY MANIFEST.
 5. Only bind animations to event types present in the observed event list.
 6. Do not invent event types, coordinates, cell values, or results.
@@ -29,8 +30,12 @@ Hard rules:
 8. Durations must be 100–3000 ms. Always include success/failure resultChoreography.
 9. The plan must work for different inputs to the same problem.
 10. Prefer making algorithm state changes visually obvious over decoration.
-11. Classify the problem using the knowledge taxonomy before choosing a theme.
-12. Prefer generic_grid when a themed preset would distort the algorithm.
+11. Classify the problem using the knowledge taxonomy before choosing structure + theme.
+12. visualPlan.structure.type MUST match init.structure / observed structureType.
+13. Put artistic choices in theme (preset, palette, props, camera, timeSystem).
+    Never generate layout coordinates — only layout enum values from capabilities.
+14. Prefer generic_grid theme when a themed preset would distort the algorithm.
+15. Use gridEvents for grid structure and arrayEvents for array structure.
 """.strip()
 
 
@@ -57,6 +62,7 @@ def build_bundle_prompt(
         "verified_execution": execution.model_dump(mode="json"),
         "observed_cell_values": observed.cellValues,
         "observed_event_types": observed.eventTypes,
+        "observed_structure_type": observed.structureType,
         "requested_style": style,
     }
 
@@ -71,8 +77,11 @@ def build_bundle_prompt(
         f"{json.dumps(untrusted_payload, indent=2)}\n\n"
         f"Requested visual style: {style}\n\n"
         "Create a semantic interpretation AND presentation-only visual plan.\n"
-        "Every observed cell value needs a binding; entities are keyed by semanticKey.\n"
-        "Follow the planning workflow in SKILL.md and the quality checklist."
+        "Choose structure.type to match observed_structure_type / init.structure.\n"
+        "Fill theme separately from structure. Every observed value needs a binding;\n"
+        "entities are keyed by semanticKey.\n"
+        "Follow structure-selection.md, the planning workflow in SKILL.md, and the "
+        "quality checklist."
     )
 
     return [

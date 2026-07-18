@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from openai import OpenAI
 
-from backend.schemas import GeneratedProblemBundle, GeneratedVisualPlan, ParsedProblemBundle
+from backend.schemas import (
+    GeneratedProblemBundle,
+    GeneratedVisualPlan,
+    ParsedProblemBundle,
+    coerce_structure,
+)
 from backend.settings import get_settings
 
 
@@ -34,7 +39,8 @@ def generate_problem_bundle(
         problemId=problem_id,
         semanticSpec=parsed.semanticSpec,
         visualPlan=GeneratedVisualPlan(
-            world=visual.world,
+            structure=coerce_structure(visual.structure),
+            theme=visual.theme,
             entities={
                 binding.semanticKey: binding.entity for binding in visual.entities
             },

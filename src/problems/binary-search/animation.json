@@ -1,0 +1,183 @@
+{
+  "structure": {
+    "type": "array",
+    "inputKey": "nums",
+    "layout": "horizontal",
+    "showIndices": true
+  },
+  "theme": {
+    "preset": "generic_grid",
+    "name": "derpy-binary-search-lane",
+    "palette": {
+      "sky": "#BDE7FF",
+      "ground": "#D8DEE9",
+      "accent": "#FFD166"
+    },
+    "camera": {
+      "mode": "isometric",
+      "position": [
+        0.0,
+        6.0,
+        12.0
+      ],
+      "target": [
+        0.0,
+        0.5,
+        0.0
+      ]
+    },
+    "props": [
+      {
+        "primitive": "goofy_cloud",
+        "placement": "sky",
+        "count": 2
+      },
+      {
+        "primitive": "sign",
+        "placement": "back",
+        "count": 1
+      }
+    ],
+    "timeSystem": {
+      "mode": "static",
+      "advanceOn": "none"
+    }
+  },
+  "entities": {
+    "number_neg_1": {
+      "primitive": "array_block",
+      "variant": "chunky_number",
+      "color": "#7DD3FC",
+      "label": "-1",
+      "idleAnimation": "gentle_bounce",
+      "expression": "curious"
+    },
+    "number_0": {
+      "primitive": "array_block",
+      "variant": "chunky_number",
+      "color": "#7DD3FC",
+      "label": "0",
+      "idleAnimation": "gentle_bounce",
+      "expression": "curious"
+    },
+    "number_12": {
+      "primitive": "array_block",
+      "variant": "chunky_number",
+      "color": "#7DD3FC",
+      "label": "12",
+      "idleAnimation": "gentle_bounce",
+      "expression": "curious"
+    },
+    "number_3": {
+      "primitive": "array_block",
+      "variant": "chunky_number",
+      "color": "#7DD3FC",
+      "label": "3",
+      "idleAnimation": "gentle_bounce",
+      "expression": "curious"
+    },
+    "number_5": {
+      "primitive": "array_block",
+      "variant": "chunky_number",
+      "color": "#7DD3FC",
+      "label": "5",
+      "idleAnimation": "gentle_bounce",
+      "expression": "curious"
+    },
+    "number_9": {
+      "primitive": "array_block",
+      "variant": "chunky_number",
+      "color": "#7DD3FC",
+      "label": "9",
+      "idleAnimation": "gentle_bounce",
+      "expression": "curious"
+    }
+  },
+  "eventBindings": {
+    "init": {
+      "effect": "none",
+      "durationMs": 300,
+      "color": null,
+      "explanation": "Show the sorted input array without changing its values.",
+      "targetReaction": "none",
+      "camera": "none"
+    },
+    "pointer_move": {
+      "effect": "pointer_hop",
+      "durationMs": 350,
+      "color": "#2563EB",
+      "explanation": "Move the emitted left, right, or mid pointer to its trace-provided index.",
+      "targetReaction": "brief_focus",
+      "camera": "none"
+    },
+    "range_highlight": {
+      "effect": "window_slide",
+      "durationMs": 400,
+      "color": "#A78BFA",
+      "explanation": "Highlight the inclusive search range supplied by the event.",
+      "targetReaction": "none",
+      "camera": "none"
+    },
+    "compare": {
+      "effect": "compare_flash",
+      "durationMs": 500,
+      "color": "#FFD166",
+      "explanation": "Emphasize the emitted midpoint while its value is compared with the target.",
+      "targetReaction": "brief_focus",
+      "camera": "brief_focus"
+    },
+    "window_shrink": {
+      "effect": "window_slide",
+      "durationMs": 450,
+      "color": "#8B5CF6",
+      "explanation": "Contract the active search window to the new emitted bounds.",
+      "targetReaction": "none",
+      "camera": "none"
+    },
+    "element_finalize": {
+      "effect": "bounce",
+      "durationMs": 650,
+      "color": "#22C55E",
+      "explanation": "Mark the emitted index as the finalized matching element.",
+      "targetReaction": "bad_dance",
+      "camera": "brief_focus"
+    },
+    "done": {
+      "effect": "result_reveal",
+      "durationMs": 800,
+      "color": "#FFD166",
+      "explanation": "Reveal the result returned by the completed search.",
+      "targetReaction": "brief_focus",
+      "camera": "brief_focus"
+    }
+  },
+  "resultChoreography": {
+    "success": {
+      "effect": "confetti",
+      "entityReaction": "bad_dance",
+      "explanation": "Celebrate when the returned index identifies the target."
+    },
+    "failure": {
+      "effect": "failure_deflate",
+      "entityReaction": "confused_stare",
+      "explanation": "Show a restrained deflation when the completed search returns -1."
+    }
+  },
+  "intro": [
+    {
+      "action": "show_title",
+      "durationMs": 900,
+      "text": "Binary Search: Keep Halving the Search Range"
+    },
+    {
+      "action": "show_structure",
+      "durationMs": 900,
+      "text": "Each chunky block is one sorted array value; indices remain visible."
+    },
+    {
+      "action": "highlight_sources",
+      "durationMs": 800,
+      "text": "The left, right, and mid pointers identify the active range and comparison position."
+    }
+  ]
+}

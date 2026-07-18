@@ -1,0 +1,169 @@
+{
+  "structure": {
+    "type": "binary_tree",
+    "inputKey": "root",
+    "layout": "layered"
+  },
+  "theme": {
+    "preset": "generic_grid",
+    "name": "derpy-mirror-tree-workshop",
+    "palette": {
+      "sky": "#CDEBFF",
+      "ground": "#E7E1D3",
+      "accent": "#FFB703"
+    },
+    "camera": {
+      "mode": "top_down",
+      "position": [
+        0.0,
+        10.0,
+        12.0
+      ],
+      "target": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "props": [
+      {
+        "primitive": "goofy_cloud",
+        "placement": "sky",
+        "count": 2
+      },
+      {
+        "primitive": "sign",
+        "placement": "back",
+        "count": 1
+      }
+    ],
+    "timeSystem": {
+      "mode": "static",
+      "advanceOn": "none"
+    }
+  },
+  "entities": {
+    "node_value_1": {
+      "primitive": "tree_node",
+      "variant": "chunky_numbered_node",
+      "color": "#7DD3FC",
+      "label": "1",
+      "idleAnimation": "gentle_bounce",
+      "expression": "cheery"
+    },
+    "node_value_2": {
+      "primitive": "tree_node",
+      "variant": "chunky_numbered_node",
+      "color": "#7DD3FC",
+      "label": "2",
+      "idleAnimation": "gentle_bounce",
+      "expression": "wide_eyed"
+    },
+    "node_value_3": {
+      "primitive": "tree_node",
+      "variant": "chunky_numbered_node",
+      "color": "#7DD3FC",
+      "label": "3",
+      "idleAnimation": "gentle_bounce",
+      "expression": "goofy_grin"
+    },
+    "node_value_4": {
+      "primitive": "tree_node",
+      "variant": "chunky_numbered_node",
+      "color": "#7DD3FC",
+      "label": "4",
+      "idleAnimation": "gentle_bounce",
+      "expression": "focused"
+    },
+    "node_value_6": {
+      "primitive": "tree_node",
+      "variant": "chunky_numbered_node",
+      "color": "#7DD3FC",
+      "label": "6",
+      "idleAnimation": "gentle_bounce",
+      "expression": "curious"
+    },
+    "node_value_7": {
+      "primitive": "tree_node",
+      "variant": "chunky_numbered_node",
+      "color": "#7DD3FC",
+      "label": "7",
+      "idleAnimation": "gentle_bounce",
+      "expression": "silly_smile"
+    },
+    "node_value_9": {
+      "primitive": "tree_node",
+      "variant": "chunky_numbered_node",
+      "color": "#7DD3FC",
+      "label": "9",
+      "idleAnimation": "gentle_bounce",
+      "expression": "proud"
+    }
+  },
+  "eventBindings": {
+    "init": {
+      "effect": "none",
+      "durationMs": 400,
+      "color": null,
+      "explanation": "Show the input tree with stable node identities and its original left and right child links.",
+      "targetReaction": "none",
+      "camera": "none"
+    },
+    "node_visit": {
+      "effect": "bounce",
+      "durationMs": 350,
+      "color": "#FFB703",
+      "explanation": "Focus the node currently reached by the recursive traversal.",
+      "targetReaction": "brief_focus",
+      "camera": "brief_focus"
+    },
+    "child_swap": {
+      "effect": "child_swap_flash",
+      "durationMs": 700,
+      "color": "#FB7185",
+      "explanation": "Make this node's traced exchange of its left and right child links visually explicit.",
+      "targetReaction": "confused_stare",
+      "camera": "none"
+    },
+    "subtree_complete": {
+      "effect": "subtree_glow",
+      "durationMs": 550,
+      "color": "#34D399",
+      "explanation": "Mark the traced subtree as complete after its descendants have been processed.",
+      "targetReaction": "brief_focus",
+      "camera": "none"
+    },
+    "done": {
+      "effect": "result_reveal",
+      "durationMs": 900,
+      "color": "#FFB703",
+      "explanation": "Reveal the returned tree after all emitted recursive work is complete.",
+      "targetReaction": "none",
+      "camera": "brief_focus"
+    }
+  },
+  "resultChoreography": {
+    "success": {
+      "effect": "confetti",
+      "entityReaction": "bad_dance",
+      "explanation": "Celebrate when the returned tree matches the expected inverted structure."
+    },
+    "failure": {
+      "effect": "failure_deflate",
+      "entityReaction": "confused_stare",
+      "explanation": "Keep the final structure visible while indicating that the returned tree did not match the expected result."
+    }
+  },
+  "intro": [
+    {
+      "action": "show_title",
+      "durationMs": 900,
+      "text": "Invert Binary Tree"
+    },
+    {
+      "action": "show_structure",
+      "durationMs": 1200,
+      "text": "Each numbered node keeps its identity while its left and right child links are exchanged."
+    }
+  ]
+}

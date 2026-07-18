@@ -18,7 +18,7 @@ def solve(grid: list[list[str]]) -> dict[str, Any]:
     def emit(event_type: str, **payload: Any) -> None:
         events.append({"type": event_type, **payload})
 
-    emit("init", grid=deepcopy(grid))
+    emit("init", structure="grid", grid=deepcopy(grid))
 
     def dfs(r: int, c: int, island_id: int, cells: list[list[int]]) -> None:
         if r < 0 or c < 0 or r >= rows or c >= cols or grid[r][c] != "1":

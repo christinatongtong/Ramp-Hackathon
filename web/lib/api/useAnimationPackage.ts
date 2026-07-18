@@ -9,6 +9,7 @@ import type {
   RunResponse,
   VisualPlan,
 } from "./types";
+import { normalizeVisualPlan } from "./types";
 
 type UseAnimationPackageResult = {
   loading: boolean;
@@ -36,7 +37,10 @@ export function useAnimationPackage(
     setError(null);
     try {
       const next = await getPackage(problemId);
-      setPkg(next);
+      setPkg({
+        ...next,
+        visualPlan: normalizeVisualPlan(next.visualPlan),
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load package");
       setPkg(null);

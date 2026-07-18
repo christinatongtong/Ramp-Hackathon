@@ -1,0 +1,169 @@
+{
+  "structure": {
+    "type": "linked_list",
+    "inputKey": "head",
+    "layout": "horizontal_train"
+  },
+  "theme": {
+    "preset": "generic_grid",
+    "name": "derpy-pointer-train",
+    "palette": {
+      "sky": "#BDE7FF",
+      "ground": "#D9E2EC",
+      "accent": "#FFB703"
+    },
+    "camera": {
+      "mode": "isometric",
+      "position": [
+        0.0,
+        7.0,
+        12.0
+      ],
+      "target": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "props": [
+      {
+        "primitive": "goofy_cloud",
+        "placement": "sky",
+        "count": 2
+      },
+      {
+        "primitive": "sign",
+        "placement": "back",
+        "count": 1
+      }
+    ],
+    "timeSystem": {
+      "mode": "static",
+      "advanceOn": "none"
+    }
+  },
+  "entities": {
+    "node_value_1": {
+      "primitive": "list_node",
+      "variant": "chunky_train_car",
+      "color": "#8ECAE6",
+      "label": "1",
+      "idleAnimation": "gentle_bounce",
+      "expression": "cheerful"
+    },
+    "node_value_2": {
+      "primitive": "list_node",
+      "variant": "chunky_train_car",
+      "color": "#8ECAE6",
+      "label": "2",
+      "idleAnimation": "gentle_bounce",
+      "expression": "cheerful"
+    },
+    "node_value_3": {
+      "primitive": "list_node",
+      "variant": "chunky_train_car",
+      "color": "#8ECAE6",
+      "label": "3",
+      "idleAnimation": "gentle_bounce",
+      "expression": "cheerful"
+    },
+    "node_value_4": {
+      "primitive": "list_node",
+      "variant": "chunky_train_car",
+      "color": "#8ECAE6",
+      "label": "4",
+      "idleAnimation": "gentle_bounce",
+      "expression": "cheerful"
+    },
+    "node_value_5": {
+      "primitive": "list_node",
+      "variant": "chunky_train_car",
+      "color": "#8ECAE6",
+      "label": "5",
+      "idleAnimation": "gentle_bounce",
+      "expression": "cheerful"
+    }
+  },
+  "eventBindings": {
+    "init": {
+      "effect": "none",
+      "durationMs": 400,
+      "color": null,
+      "explanation": "Show the linked list with stable node identities and its initial next links.",
+      "targetReaction": "none",
+      "camera": "none"
+    },
+    "pointer_set": {
+      "effect": "pointer_hop",
+      "durationMs": 350,
+      "color": "#FFB703",
+      "explanation": "Place the named prev, curr, or next pointer on its trace-specified node or null endpoint.",
+      "targetReaction": "brief_focus",
+      "camera": "none"
+    },
+    "node_visit": {
+      "effect": "bounce",
+      "durationMs": 300,
+      "color": "#219EBC",
+      "explanation": "Focus the current node before its outgoing link is changed.",
+      "targetReaction": "brief_focus",
+      "camera": "brief_focus"
+    },
+    "link_update": {
+      "effect": "edge_connect",
+      "durationMs": 650,
+      "color": "#FB8500",
+      "explanation": "Replace the current node's old next connection with the trace-specified new next connection.",
+      "targetReaction": "confused_stare",
+      "camera": "brief_focus"
+    },
+    "node_finalize": {
+      "effect": "list_complete",
+      "durationMs": 400,
+      "color": "#2A9D8F",
+      "explanation": "Mark the node as settled in the reversed portion of the list.",
+      "targetReaction": "brief_focus",
+      "camera": "none"
+    },
+    "pointer_move": {
+      "effect": "pointer_hop",
+      "durationMs": 350,
+      "color": "#FFB703",
+      "explanation": "Move the named pointer to its trace-specified next node or null endpoint.",
+      "targetReaction": "brief_focus",
+      "camera": "none"
+    },
+    "done": {
+      "effect": "result_reveal",
+      "durationMs": 900,
+      "color": "#2A9D8F",
+      "explanation": "Reveal the completed linked list using the final head and rewired next links.",
+      "targetReaction": "brief_focus",
+      "camera": "brief_focus"
+    }
+  },
+  "resultChoreography": {
+    "success": {
+      "effect": "confetti",
+      "entityReaction": "bad_dance",
+      "explanation": "Celebrate after the trace confirms the reversed list result."
+    },
+    "failure": {
+      "effect": "failure_deflate",
+      "entityReaction": "confused_stare",
+      "explanation": "Deflate gently if a run does not produce its expected reversed list."
+    }
+  },
+  "intro": [
+    {
+      "action": "show_title",
+      "durationMs": 900,
+      "text": "Reverse Linked List"
+    },
+    {
+      "action": "show_structure",
+      "durationMs": 1200,
+      "text": "Each numbered car keeps its identity while its next arrow is rewired."
+    }
+  ]
+}

@@ -38,7 +38,16 @@ def run(problem_id: str, example_index: int | None = None) -> dict:
     idx = config.get("defaultExample", 0) if example_index is None else example_index
     example = config["examples"][idx]
     module = load_solution(problem_id, config["solutionFile"])
-    return module.solve(example["input"])
+    raw_input = example["input"]
+    # Instrumented solutions accept either a single positional payload or
+    # kwargs matching entrypoint.arguments when input is a dict.
+    entry = config.get("entrypoint") or {}
+    arguments = entry.get("arguments") or []
+    if isinstance(raw_input, dict) and isinstance(arguments, list) and arguments:
+        kwargs = {arg: raw_input[arg] for arg in arguments if arg in raw_input}
+        if len(kwargs) == len(arguments):
+            return module.solve(**kwargs)
+    return module.solve(raw_input)
 
 
 def main() -> None:

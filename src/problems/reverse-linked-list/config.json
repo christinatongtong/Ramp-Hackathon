@@ -1,0 +1,62 @@
+{
+  "id": "reverse-linked-list",
+  "number": 206,
+  "title": "Reverse Linked List",
+  "difficulty": "Easy",
+  "category": "linked_list",
+  "algorithm": ["linked-list"],
+  "scene": {
+    "type": "linked_list",
+    "inputKey": "head"
+  },
+  "examples": [
+    {
+      "name": "Five nodes",
+      "input": { "head": [1, 2, 3, 4, 5] },
+      "expected": [5, 4, 3, 2, 1]
+    },
+    {
+      "name": "Two nodes",
+      "input": { "head": [1, 2] },
+      "expected": [2, 1]
+    },
+    {
+      "name": "Empty list",
+      "input": { "head": [] },
+      "expected": []
+    }
+  ],
+  "tests": [
+    {
+      "input": { "head": [1, 2, 3, 4, 5] },
+      "expected": [5, 4, 3, 2, 1],
+      "hidden": false
+    },
+    {
+      "input": { "head": [1, 2] },
+      "expected": [2, 1],
+      "hidden": false
+    },
+    {
+      "input": { "head": [] },
+      "expected": [],
+      "hidden": false
+    },
+    {
+      "input": { "head": [7, 0, -3, 8] },
+      "expected": [8, -3, 0, 7],
+      "hidden": true
+    }
+  ],
+  "solutionFile": "solution.py",
+  "defaultExample": 0,
+  "entrypoint": {
+    "language": "python",
+    "className": "Solution",
+    "methodName": "reverseList",
+    "arguments": ["head"],
+    "argumentCodecs": { "head": "linked_list" },
+    "returnCodec": "linked_list"
+  },
+  "starterCode": "from typing import Optional\n\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\n\nclass Solution:\n    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:\n        # Write your solution here\n        pass\n"
+}

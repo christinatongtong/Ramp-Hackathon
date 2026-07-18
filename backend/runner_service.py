@@ -3,6 +3,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any
 
+from backend.initial_state import build_initial_state
 from backend.judge_service import judge_user_code
 from backend.problem_loader import get_entrypoint, get_judge_tests
 from backend.schemas import ExecutionResult, ProblemPackage, RunResponse
@@ -52,7 +53,7 @@ def run_canonical_trace(
         result=result,
         expected=expected,
         passed=result == expected,
-        initialState=_build_initial_state(initial_input),
+        initialState=build_initial_state(initial_input, problem.config),
         finalState=_build_final_state(raw, final_grid),
         events=events,
     )
@@ -121,14 +122,6 @@ def run_submission(
     )
 
 
-def _build_initial_state(initial_input: Any) -> dict[str, Any]:
-    if isinstance(initial_input, list):
-        return {"grid": initial_input}
-    if isinstance(initial_input, dict):
-        return dict(initial_input)
-    return {"input": initial_input}
-
-
 def _build_final_state(raw: dict[str, Any], final_grid: Any) -> dict[str, Any]:
     if final_grid is not None:
         return {"grid": final_grid}
@@ -136,5 +129,9 @@ def _build_final_state(raw: dict[str, Any], final_grid: Any) -> dict[str, Any]:
     final_state = raw.get("finalState")
     if isinstance(final_state, dict):
         return final_state
+
+    values = raw.get("finalValues")
+    if isinstance(values, list):
+        return {"values": values}
 
     return {}

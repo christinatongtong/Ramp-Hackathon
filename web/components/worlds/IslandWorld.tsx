@@ -7,6 +7,7 @@ import * as THREE from "three";
 import { BaseGridWorld } from "./BaseGridWorld";
 import type { GridWorldProps } from "./types";
 import type { VisualPlan } from "@/lib/api/types";
+import { getTheme } from "@/lib/api/types";
 
 function Palm({
   position,
@@ -67,14 +68,15 @@ function OceanPlane({ color }: { color: string }) {
 }
 
 function IslandEnvironment({ visualPlan }: { visualPlan: VisualPlan }) {
-  const palette = visualPlan.world.palette;
+  const theme = getTheme(visualPlan);
+  const palette = theme.palette;
   const ocean = "#1e88c8";
   const sandColor = palette.ground || "#e0c070";
 
   const palmCount =
-    visualPlan.world.props.find((prop) => prop.primitive === "tree")?.count ?? 3;
+    theme.props.find((prop) => prop.primitive === "tree")?.count ?? 3;
   const cloudCount =
-    visualPlan.world.props.find(
+    theme.props.find(
       (prop) => prop.primitive === "cloud" || prop.primitive === "goofy_cloud",
     )?.count ?? 2;
 

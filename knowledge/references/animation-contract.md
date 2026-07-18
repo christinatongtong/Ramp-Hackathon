@@ -6,15 +6,21 @@ The animation plan may style an event, but it may not:
 
 - Create new algorithm events
 - Change event order
-- Change coordinates
-- Change cell values
+- Change coordinates / indices
+- Change cell or element values
 - Change the result
 - Infer events missing from the trace
+- Contradict `init.structure`
+
+Plans use **structure** (topology) + **theme** (art). Do not emit a legacy
+`world` block; the backend migrates old plans on load.
+
+## Grid vocabulary
 
 Prefer the shared grid-event vocabulary in `grid-events.md` /
 `visual-capabilities.json` → `gridEvents`:
 
-- `init` — initial grid snapshot
+- `init` — initial grid snapshot (`structure: "grid"`)
 - `visit` — examine / mark a cell (`row`, `col`, optional `value`)
 - `frontier_add` / `frontier_remove` — BFS frontier membership
 - `cell_update` — a cell changes value
@@ -25,7 +31,15 @@ Prefer the shared grid-event vocabulary in `grid-events.md` /
 - `done` — execution completes
 
 Legacy aliases such as `enqueue`, `dequeue`, or `path` may still appear in older
-traces. Bind only events that are actually present. Do not invent shared-vocab
-events that the trace did not emit.
+traces. Bind only events that are actually present.
+
+## Array vocabulary
+
+See `array-scenes.md` / `arrayEvents`:
+
+- `init` — values snapshot (`structure: "array"`)
+- `compare`, `swap`, `write`
+- `pointer_move`, `window_expand` / `window_shrink`, `range_highlight`
+- `element_finalize`, `done`
 
 The exact available events are supplied in the verified / observed event list.

@@ -1,0 +1,186 @@
+{
+  "structure": {
+    "type": "array",
+    "inputKey": "numbers",
+    "layout": "horizontal",
+    "showIndices": true
+  },
+  "theme": {
+    "preset": "generic_grid",
+    "name": "derpy-two-pointer-number-lane",
+    "palette": {
+      "sky": "#BDE7FF",
+      "ground": "#DCE6F2",
+      "accent": "#FFD166"
+    },
+    "camera": {
+      "mode": "isometric",
+      "position": [
+        0.0,
+        6.0,
+        12.0
+      ],
+      "target": [
+        0.0,
+        0.5,
+        0.0
+      ]
+    },
+    "props": [
+      {
+        "primitive": "goofy_cloud",
+        "placement": "sky",
+        "count": 2
+      },
+      {
+        "primitive": "sign",
+        "placement": "back",
+        "count": 1
+      }
+    ],
+    "timeSystem": {
+      "mode": "static",
+      "advanceOn": "none"
+    }
+  },
+  "entities": {
+    "numeric_value_2": {
+      "primitive": "array_block",
+      "variant": "chunky_number",
+      "color": "#6EA8FE",
+      "label": "2",
+      "idleAnimation": "gentle_bounce",
+      "expression": "wide-eyed"
+    },
+    "numeric_value_7": {
+      "primitive": "array_block",
+      "variant": "chunky_number",
+      "color": "#6EA8FE",
+      "label": "7",
+      "idleAnimation": "gentle_bounce",
+      "expression": "wide-eyed"
+    },
+    "numeric_value_9": {
+      "primitive": "array_block",
+      "variant": "chunky_number",
+      "color": "#6EA8FE",
+      "label": "9",
+      "idleAnimation": "gentle_bounce",
+      "expression": "wide-eyed"
+    },
+    "numeric_value_11": {
+      "primitive": "array_block",
+      "variant": "chunky_number",
+      "color": "#6EA8FE",
+      "label": "11",
+      "idleAnimation": "gentle_bounce",
+      "expression": "wide-eyed"
+    },
+    "numeric_value_13": {
+      "primitive": "array_block",
+      "variant": "chunky_number",
+      "color": "#6EA8FE",
+      "label": "13",
+      "idleAnimation": "gentle_bounce",
+      "expression": "wide-eyed"
+    },
+    "numeric_value_15": {
+      "primitive": "array_block",
+      "variant": "chunky_number",
+      "color": "#6EA8FE",
+      "label": "15",
+      "idleAnimation": "gentle_bounce",
+      "expression": "wide-eyed"
+    },
+    "numeric_value_17": {
+      "primitive": "array_block",
+      "variant": "chunky_number",
+      "color": "#6EA8FE",
+      "label": "17",
+      "idleAnimation": "gentle_bounce",
+      "expression": "wide-eyed"
+    }
+  },
+  "eventBindings": {
+    "init": {
+      "effect": "none",
+      "durationMs": 300,
+      "color": null,
+      "explanation": "Show the sorted number array with its indices.",
+      "targetReaction": "none",
+      "camera": "none"
+    },
+    "pointer_move": {
+      "effect": "pointer_hop",
+      "durationMs": 450,
+      "color": "#8B5CF6",
+      "explanation": "Move the emitted left or right pointer to its new index.",
+      "targetReaction": "brief_focus",
+      "camera": "none"
+    },
+    "range_highlight": {
+      "effect": "window_slide",
+      "durationMs": 400,
+      "color": "#93C5FD",
+      "explanation": "Highlight the inclusive range currently bounded by the two pointers.",
+      "targetReaction": "brief_focus",
+      "camera": "none"
+    },
+    "compare": {
+      "effect": "compare_flash",
+      "durationMs": 650,
+      "color": "#FFD166",
+      "explanation": "Flash the two emitted indices while their sum is compared with the target.",
+      "targetReaction": "confused_stare",
+      "camera": "brief_focus"
+    },
+    "window_shrink": {
+      "effect": "window_slide",
+      "durationMs": 500,
+      "color": "#60A5FA",
+      "explanation": "Shrink the active range to the newly emitted pointer bounds.",
+      "targetReaction": "brief_focus",
+      "camera": "none"
+    },
+    "element_finalize": {
+      "effect": "bounce",
+      "durationMs": 550,
+      "color": "#34D399",
+      "explanation": "Mark the emitted index as one of the finalized pair.",
+      "targetReaction": "bad_dance",
+      "camera": "brief_focus"
+    },
+    "done": {
+      "effect": "result_reveal",
+      "durationMs": 900,
+      "color": "#FFD166",
+      "explanation": "Reveal the result emitted when execution completes.",
+      "targetReaction": "brief_focus",
+      "camera": "brief_focus"
+    }
+  },
+  "resultChoreography": {
+    "success": {
+      "effect": "confetti",
+      "entityReaction": "bad_dance",
+      "explanation": "Celebrate when the finalized pair produces the successful result."
+    },
+    "failure": {
+      "effect": "failure_deflate",
+      "entityReaction": "confused_stare",
+      "explanation": "Deflate gently if execution completes without a pair."
+    }
+  },
+  "intro": [
+    {
+      "action": "show_structure",
+      "durationMs": 900,
+      "text": "Meet the sorted number lane and its 1-based indices."
+    },
+    {
+      "action": "show_title",
+      "durationMs": 1000,
+      "text": "Two pointers squeeze inward while each endpoint sum is compared with the target."
+    }
+  ]
+}
