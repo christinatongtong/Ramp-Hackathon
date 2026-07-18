@@ -1,35 +1,33 @@
 # Ramp Hackathon
 
-Visual LeetCode playground: each problem is a self-contained package. Press **Start** to run the canonical instrumented solution and animate its events.
+Visual LeetCode playground.
 
-## Problem packages
-
-```
-src/problems/
-  registry.json                 # list of problem ids (add new ones here)
-  rotting-oranges/
-    problem.md                  # human-readable description
-    config.json                 # scene, examples, metadata
-    solution.py                 # instrumented canonical solution
-    assets/
-  number-of-islands/
-  pacific-atlantic/
-  shortest-path-binary-matrix/
+```text
+Next.js frontend:  localhost:3000
+FastAPI backend:   localhost:8000
 ```
 
-### Adding a problem
+## Structure
 
-1. Create `src/problems/<id>/` with `problem.md`, `config.json`, `solution.py`, and optional `assets/`.
-2. Append `"<id>"` to `registry.json`.
-3. Reuse an existing `scene.type` (currently `grid`) so the Start animation works without new UI code.
+- `src/app/` — Next.js App Router pages
+- `src/problems/` — problem packages (`problem.md`, `config.json`, `solution.py`, `animation.json`)
+- `public/problems/` — assets referenced by URL (e.g. `/problems/rotting-oranges/orange.png`)
+- `backend/` — FastAPI (Python runner, OpenAI, validation)
+- `knowledge/` — animation skill + contracts for generation
 
-### Start flow (v1)
+## Adding a problem
 
-1. UI loads problem via `src/lib/loadProblem.ts` (markdown + config).
-2. On **Start**, run `python -m src.runner <id>` (or call the same from a small API).
-3. Replay `events` from the JSON response with the grid scene renderer.
+1. Create `src/problems/<id>/` with `problem.md`, `config.json`, `solution.py`, `animation.json`
+2. Append `"<id>"` to `src/problems/registry.json`
+3. Put public sprites in `public/problems/<id>/`
+4. Reuse `scene.type: "grid"` so Start playback works without new UI
+
+## Dev
 
 ```bash
-python3 -m src.runner rotting-oranges
-python3 -m src.runner number-of-islands --example 1
+npm install
+npm run dev
+
+# backend (separate terminal)
+# uvicorn backend.app:app --reload --port 8000
 ```

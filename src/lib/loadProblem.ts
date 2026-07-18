@@ -1,54 +1,64 @@
-/**
- * Dynamic problem loader.
- *
- * Add a new LeetCode problem by:
- * 1. Creating src/problems/<id>/ with problem.md, config.json, solution.py, assets/
- * 2. Appending "<id>" to registry.json
- *
- * The UI only knows about scene.type + events — never hardcode per-problem logic.
- */
+import "server-only";
 
-import type { LoadedProblem, ProblemConfig } from "./problemTypes";
-import registry from "../problems/registry.json";
+import fs from "node:fs/promises";
+import path from "node:path";
 
-const problemModules = import.meta.glob("../problems/*/config.json", {
-  eager: true,
-  import: "default",
-}) as Record<string, ProblemConfig>;
+import type {
+  LoadedProblem,
+  ProblemConfig,
+  ProblemSummary,
+} from "./problemTypes";
 
-const markdownModules = import.meta.glob("../problems/*/problem.md", {
-  eager: true,
-  query: "?raw",
-  import: "default",
-}) as Record<string, string>;
-
-function packagePath(id: string, file: string): string {
-  return `../problems/${id}/${file}`;
+function problemsRoot(): string {
+  return path.join(process.cwd(), "src", "problems");
 }
 
-export function listProblemIds(): string[] {
+function problemDirectory(problemId: string): string {
+  return path.join(problemsRoot(), problemId);
+}
+
+export async function listProblemIds(): Promise<string[]> {
+  const raw = await fs.readFile(
+    path.join(problemsRoot(), "registry.json"),
+    "utf8"
+  );
+  const registry = JSON.parse(raw) as { problems: string[] };
   return registry.problems;
 }
 
-export function loadProblem(id: string): LoadedProblem {
-  const configKey = packagePath(id, "config.json");
-  const mdKey = packagePath(id, "problem.md");
-  const config = problemModules[configKey];
-  const markdown = markdownModules[mdKey];
+export async function loadProblem(problemId: string): Promise<LoadedProblem> {
+  const dir = problemDirectory(problemId);
 
-  if (!config || !markdown) {
-    throw new Error(`Problem package not found: ${id}`);
-  }
+  const [markdown, configRaw, animationRaw] = await Promise.all([
+    fs.readFile(path.join(dir, "problem.md"), "utf8"),
+    fs.readFile(path.join(dir, "config.json"), "utf8"),
+    fs.readFile(path.join(dir, "animation.json"), "utf8"),
+  ]);
+
+  const config = JSON.parse(configRaw) as ProblemConfig;
 
   return {
-    config,
     markdown,
-    assetsBase: `/src/problems/${id}/assets`,
+    config,
+    animation: JSON.parse(animationRaw),
+    assetsBase: `/problems/${problemId}`,
   };
 }
 
-export function loadAllProblems(): LoadedProblem[] {
-  return listProblemIds().map(loadProblem);
+export async function loadProblemSummary(
+  problemId: string
+): Promise<ProblemSummary> {
+  const raw = await fs.readFile(
+    path.join(problemDirectory(problemId), "config.json"),
+    "utf8"
+  );
+  const config = JSON.parse(raw) as ProblemConfig;
+  return {
+    id: config.id,
+    number: config.number,
+    title: config.title,
+    difficulty: config.difficulty,
+  };
 }
 
 /** Input used when the user presses Start (canonical demo). */

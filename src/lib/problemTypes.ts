@@ -1,11 +1,8 @@
 /**
  * Shared types for problem packages under src/problems/<id>/.
  *
- * Dynamic loading flow (Start button v1):
- * 1. Read registry.json → list of problem ids
- * 2. Load config.json + problem.md for the selected id
- * 3. POST example input to a runner that executes solution.py
- * 4. Replay returned events with the scene renderer for config.scene.type
+ * Next.js server pages load packages via fs (see loadProblem.ts).
+ * Client components receive the loaded data as props and handle playback.
  */
 
 export type SceneType = "grid";
@@ -53,9 +50,18 @@ export interface SolutionResult {
   path?: number[][];
 }
 
+export interface ProblemSummary {
+  id: string;
+  number: number;
+  title: string;
+  difficulty: ProblemConfig["difficulty"];
+}
+
 export interface LoadedProblem {
   config: ProblemConfig;
   markdown: string;
-  /** Vite/public URL base for assets inside the package */
+  /** Hand-written or generated AnimationPlan (see animation.json) */
+  animation: unknown;
+  /** Public URL base — serve assets from public/problems/<id>/ */
   assetsBase: string;
 }
